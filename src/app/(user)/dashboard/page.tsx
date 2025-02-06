@@ -29,20 +29,11 @@ interface StatCard {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [user, setUser] = useState(session?.user);
+  const user = session?.user;
 
-  const getUser = async () => {
-    if(session?.user){
-      const response = await fetch('/api/auth/user');
-      const data = await response.json();
-      setUser(data.user);
-    }
+  if (!session || !user) {
+    return null; // or a loading spinner
   }
-
-
-  useEffect(()=> {
-    getUser();
-  },[])
 
   const quickLinks = [
     {
@@ -81,7 +72,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Welcome back, <span className='capitalize'>{session?.user?.username || 'User'}</span>
+            Welcome back, <span className='capitalize'>{user.username || 'User'}</span>
           </h1>
         </div>
         <Link
@@ -103,7 +94,7 @@ export default function DashboardPage() {
             <Link
               href="/connect-telegram"
               className={`flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border ${
-                user?.telegramId ? 'border-green-500' : 'border-red-500'
+                user.telegramId ? 'border-green-500' : 'border-red-500'
               } hover:border-blue-500 dark:hover:border-blue-500 transition-colors`}
             >
               <div className="flex-1">
@@ -114,7 +105,7 @@ export default function DashboardPage() {
                   Connect to UST Telegram bot for realtime logs
                 </p>
               </div>
-              {user?.telegramId ? (
+              {user.telegramId ? (
                 <CheckCircleIcon className="h-5 w-5 text-green-500" />
               ) : (
                 <ExclamationCircleIcon className="h-5 w-5 text-red-500" />

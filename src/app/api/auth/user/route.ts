@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../[...nextauth]/route";
 import User from "@/models/User";
 import Link from "@/models/Link";
+import connectDB from "@/lib/db";
 
 export async function GET(){
     try{
@@ -10,6 +11,7 @@ export async function GET(){
         if(!session){
             return NextResponse.json({error:'unauthorized'}, {status: 401});
         }
+        await connectDB();
         const user = await User.findById(session.user.id);
         const links = await Link.find({userId: user._id}).sort({createdAt: -1});
         return NextResponse.json({user, links}, {status:200});

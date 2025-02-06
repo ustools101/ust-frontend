@@ -2,18 +2,13 @@
 
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import ThemeToggle from './ThemeToggle';
 import { CreditCardIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
   const { data: session } = useSession();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [points, setPoints] = useState<number>(0);
+  const [points, setPoints] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (session?.user) {
@@ -37,7 +32,7 @@ export default function Navigation() {
                 <div className="flex items-center space-x-3 bg-gray-100 dark:bg-gray-800 py-1.5 px-3 rounded-full">
                   <CreditCardIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {points.toLocaleString()} C
+                    {points?.toLocaleString()} C
                   </span>
                   <Link
                     href="/buy"
