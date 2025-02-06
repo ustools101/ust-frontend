@@ -7,6 +7,7 @@ import AuthProvider from '@/components/providers/session-provider';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import Navigation from '@/components/Navigation';
+import { Analytics } from "@vercel/analytics/react"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen`}
       >
+        <Analytics />
         <AuthProvider session={session}>
           <ThemeProvider>
             <Toaster />
