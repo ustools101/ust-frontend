@@ -10,11 +10,8 @@ interface SigninFormData {
   password: string;
 }
 
-export default function SigninForm() {
+function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  
   const [formData, setFormData] = useState<SigninFormData>({
     email: '',
     password: '',
@@ -30,29 +27,25 @@ export default function SigninForm() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+    setError('');
 
     try {
       const result = await signIn('credentials', {
+        redirect: false,
         email: formData.email,
         password: formData.password,
-        redirect: false,
       });
 
       if (result?.error) {
-        console.log(result.error);
-        setError('Invalid credentials');
-        return;
+        setError('Invalid email or password');
+      } else {
+        router.push(callbackUrl);
       }
-
-      router.push(callbackUrl);
-      router.refresh();
-    } catch (err) {
-      console.log(err);
-      setError('An unexpected error occurred');
+    } catch (error) {
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -61,94 +54,68 @@ export default function SigninForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-3 text-sm rounded bg-red-500/10 border border-red-500/20 text-red-500 font-mono">
-          <span className="text-red-400">!</span> {error}
+        <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500">
+          {error}
         </div>
       )}
       
-      <div className="space-y-2">
-        <label htmlFor="email" className="block font-mono text-sm text-primary-400">
-          <span className="text-secondary-200">#</span> email
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+          Email
         </label>
-        <div className="relative">
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full bg-secondary-900/50 border border-secondary-700 py-2 px-4 font-mono text-white placeholder-secondary-500
-                     focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-                     transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="Enter email"
-            disabled={isLoading}
-          />
-          <div className="absolute right-2 top-2 font-mono text-secondary-500">@</div>
-        </div>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="mt-1 block w-full rounded-md bg-secondary-700/50 border border-primary-500/20 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+          placeholder="john@example.com"
+        />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="block font-mono text-sm text-primary-400">
-          <span className="text-secondary-200">*</span> password
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+          Password
         </label>
-        <div className="relative">
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full bg-secondary-900/50 border border-secondary-700 py-2 px-4 font-mono text-white placeholder-secondary-500
-                     focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-                     transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="Enter password"
-            disabled={isLoading}
-          />
-          <div className="absolute right-2 top-2 font-mono text-secondary-500">***</div>
-        </div>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          className="mt-1 block w-full rounded-md bg-secondary-700/50 border border-primary-500/20 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+          placeholder="••••••••"
+        />
       </div>
 
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full group px-8 py-4 bg-transparent text-primary-400 font-mono text-lg 
-                 transition-all duration-300 relative overflow-hidden border border-primary-500
-                 hover:bg-primary-500/20 hover:shadow-[0_0_15px_#86C232] mt-8
-                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none"
+        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span className="relative z-10 flex items-center justify-center">
-          <span className="mr-2">[</span>
-          {isLoading ? (
-            <>
-              <span className="text-white mr-2">$</span>authenticating...
-            </>
-          ) : (
-            <>
-              <span className="text-white mr-2">$</span>login
-            </>
-          )}
-          <span className="ml-2">]</span>
-        </span>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-transparent 
-                    transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+        {isLoading ? (
+          <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          'Sign in'
+        )}
       </button>
 
-      {/* Signup Link */}
-      <div className="mt-6 text-center font-mono text-sm">
-        <span className="text-secondary-400">Don&apos;t have an account? </span>
-        <Link href="/signup" className="text-primary-400 hover:text-primary-300 transition-colors duration-200">
-          ./signup.sh
-        </Link>
-      </div>
-      {/* forgot password */}
-      <div className="mt-6 text-center font-mono text-sm">
-        <span className="text-secondary-400">Forgot password? </span>
-        <Link href="/forgot_password" className="text-primary-400 hover:text-primary-300 transition-colors duration-200">
-          ./forgot_password.sh
+      <div className="text-sm text-gray-400">
+        Don't have an account?{' '}
+        <Link href="/signup" className="text-primary-500 hover:text-primary-400">
+          Sign up
         </Link>
       </div>
     </form>
   );
+}
+
+export default function SigninForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
+  return <SigninFormContent callbackUrl={callbackUrl} />;
 }
