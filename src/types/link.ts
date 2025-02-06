@@ -21,3 +21,5 @@ export default interface ILink {
     updatedAt?: Date;
     createdAt?: Date;   
 }
+
+
