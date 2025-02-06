@@ -89,7 +89,7 @@ export default function BuyCreditsPage() {
             }
 
             toast.success('Payment successful! Credits added to your account.');
-            router.push('/dashboard');
+            router.push('/credits');
           } catch (error) {
             console.error('Verification error:', error);
             toast.error('Failed to verify payment. Please contact support.');

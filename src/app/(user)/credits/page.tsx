@@ -35,6 +35,7 @@ interface PaginationInfo {
 
 export default function CreditsPage() {
   const { data: session } = useSession();
+  const [credits, setCredits] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -43,6 +44,20 @@ export default function CreditsPage() {
     limit: 10,
     pages: 0
   });
+
+  const getUser = async () => {
+    if(session?.user){
+      const response = await fetch('/api/auth/user');
+      const data = await response.json();
+      setCredits(data.user.points);
+    }
+  }
+
+
+  useEffect(()=> {
+    getUser();
+  },[])
+
 
   const fetchTransactions = async (page: number = 1) => {
     try {
@@ -91,7 +106,7 @@ export default function CreditsPage() {
           
           <div className="mt-6">
             <div className="text-xl font-bold text-gray-900 dark:text-white">
-              {session?.user?.points?.toLocaleString() || 0} Credits
+              {credits?.toLocaleString() || 0} Credits
             </div>
           </div>
         </div>

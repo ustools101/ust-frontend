@@ -16,6 +16,7 @@ export default function Navigation() {
       const data = await response.json();
       setPoints(data.user.points);
     }
+    setTimeout(getUser, 30000)
   }
 
 
