@@ -5,24 +5,21 @@ import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 import { CreditCardIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
   const { data: session } = useSession();
-  const [points, setPoints] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const [points, setPoints] = useState<number>(0);
 
-  const getUser = async () => {
-    if(session?.user){
-      const response = await fetch('/api/auth/user');
-      const data = await response.json();
-      setPoints(data.user.points);
+  useEffect(() => {
+    if (session?.user) {
+      setPoints(Number(session?.user.points) || 0);
     }
-    setTimeout(getUser, 30000)
-  }
-
-
-  useEffect(()=> {
-    getUser();
-  },[])
+  }, [session]);
 
   return (
     <nav className="border-b dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm fixed w-full top-0 z-50">
