@@ -85,7 +85,7 @@ export default function InstallApp() {
               </div>
               <div>
                 <p className="font-medium">
-                  Install Ultimate Social Tools
+                  Install USTools
                 </p>
                 <p className="text-sm opacity-75">
                   {isIOS 

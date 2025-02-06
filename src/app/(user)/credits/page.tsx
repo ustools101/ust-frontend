@@ -80,15 +80,6 @@ export default function CreditsPage() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
         <div className="p-8">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <CreditCardIcon className="h-6 w-6 text-blue-500" />
-                Credit Balance
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Available credits in your account
-              </p>
-            </div>
             <Link
               href="/buy"
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -99,7 +90,7 @@ export default function CreditsPage() {
           </div>
           
           <div className="mt-6">
-            <div className="text-4xl font-bold text-gray-900 dark:text-white">
+            <div className="text-xl font-bold text-gray-900 dark:text-white">
               {session?.user?.points?.toLocaleString() || 0} Credits
             </div>
           </div>
