@@ -10,11 +10,21 @@ export default function Navigation() {
   const { data: session } = useSession();
   const [points, setPoints] = useState<number | undefined>(undefined);
 
-  useEffect(() => {
-    if (session?.user) {
-      setPoints(Number(session?.user.points) || 0);
+  const getUser = async () => {
+    if(session?.user){
+      const response = await fetch('/api/auth/user');
+      const data = await response.json();
+      setPoints(data.user.points);
     }
-  }, [session]);
+    setTimeout(() => {
+      getUser();
+    }, 10000);
+  }
+
+
+  useEffect(()=> {
+    getUser();
+  },[])
 
   return (
     <nav className="border-b dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm fixed w-full top-0 z-50">
