@@ -70,7 +70,7 @@ export default function LinkDetails() {
       if (data.linkUrl) newFormData.linkUrl = data.linkUrl;
       if(data.socialMedia) newFormData.socialMedia = data.socialMedia;
 
-      if(data.socialMedia.length === 1) setPricePerWeek(3000);
+      if(data.socialMedia.length === 1) setPricePerWeek(4000);
       if(data.socialMedia.length === 2) setPricePerWeek(6500);
       if(data.socialMedia.length === 3) setPricePerWeek(9000);
 
