@@ -12,11 +12,18 @@ interface PaystackResponse {
   status: string;
 }
 
+let PaystackPopInstance: typeof PaystackPop | null = null;
+
 export default function BuyCreditsPage() {
   const { data: session } = useSession();
   const [amount, setAmount] = useState<number>(1000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Initialize PaystackPop only on client side
+    PaystackPopInstance = PaystackPop;
+  }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -49,6 +56,11 @@ export default function BuyCreditsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!PaystackPopInstance) {
+      toast.error('Payment system is not ready. Please try again.');
+      return;
+    }
     
     if (!amount || amount < 1000) {
       toast.error('Minimum amount is 1,000 credits');
@@ -80,7 +92,7 @@ export default function BuyCreditsPage() {
         throw new Error(data.error || 'Failed to initialize payment');
       }
 
-      const paystack = new PaystackPop();
+      const paystack = new PaystackPopInstance();
       paystack.newTransaction({
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
         email: session?.user?.email.toString()!,
