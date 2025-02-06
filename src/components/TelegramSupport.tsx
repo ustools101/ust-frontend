@@ -8,7 +8,7 @@ export default function TelegramSupport() {
       href="https://t.me/bug_killer101"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-52 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#229ED9] hover:bg-[#1d8ac0] rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
+      className="fixed bottom-32 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#229ED9] hover:bg-[#1d8ac0] rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
       aria-label="Contact Support on Telegram"
     >
       <svg 
