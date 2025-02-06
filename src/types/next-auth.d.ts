@@ -4,34 +4,24 @@ import { JWT } from "next-auth/jwt";
 declare module "next-auth" {
   interface Session {
     user: {
-      id: string;
-      email: string;
-      username: string;
-      points: number;
-      telegramId: number;
+      id: String;
+      email: String;
+      username: String;
+      points: Number;
+      telegramId: Number;
       enableTelegramNotification: boolean;
-      role: string;
+      role: String;
     }
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    username: string;
-    points: number;
-    telegramId: number;
-    enableTelegramNotification: boolean;
-    role: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id: string;
-    username: string;
-    points: number;
-    role: string;
-    telegramId: number;
+    id: String;
+    username: String;
+    points: Number;
+    role: String;
+    telegramId: Number;
     enableTelegramNotification: boolean;
   }
 }

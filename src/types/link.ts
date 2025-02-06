@@ -11,12 +11,12 @@ export default interface ILink {
     linkType: LinkType;
     linkName: String;
     contestantName?: String;
-    title?: string;
+    title?: String;
     writeup: String;
     socialMedia?: SociaMedia;
     expiresAt: Date;
-    image: string;
-    bannerImage?: string;
+    image: String;
+    bannerImage?: String;
     otpEnabled?: Boolean;
     updatedAt?: Date;
     createdAt?: Date;   
