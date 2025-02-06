@@ -21,8 +21,9 @@ export default function BuyCreditsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Initialize PaystackPop only on client side
-    PaystackPopInstance = PaystackPop;
+    if (typeof window !== 'undefined') {
+      PaystackPopInstance = PaystackPop;
+    }
   }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
