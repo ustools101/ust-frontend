@@ -7,10 +7,6 @@ import { CreditCardIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import PaystackPop from '@paystack/inline-js';
 
-interface PaystackResponse {
-  reference: string;
-  status: string;
-}
 
 export default function BuyCreditsPage() {
   const { data: session } = useSession();
@@ -81,18 +77,22 @@ export default function BuyCreditsPage() {
       }
 
       const paystack = new PaystackPop();
-      paystack.newTransaction({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-        email: session?.user?.email.toString()!,
-        amount: amount * 100,
-        ref: data?.reference,
-        access_code: data.access_code,
-        onClose: () => {
+      // @ts-ignore
+      paystack.resumeTransaction(data.access_code, {
+        onCancel: () => {
           toast.error('Payment cancelled');
           setIsProcessing(false);
         },
-        callback: async (response: PaystackResponse) => {
-          await verifyPayment(response.reference);
+        onError: (message:string) => {
+          toast.error(message);
+          setIsProcessing(false);
+        },
+        onSuccess: async () => {
+          toast.success('Payment successful');
+          setIsProcessing(false);
+          setTimeout(() => {
+            router.push("/points")
+          }, 2000)
         }
       });
     } catch (error) {
