@@ -16,7 +16,13 @@ import {
   ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+
+interface UserData {
+  username: string;
+  points: number;
+  telegramId?: string;
+}
 
 interface StatCard {
   title: string;
@@ -26,13 +32,78 @@ interface StatCard {
   trend?: 'up' | 'down' | 'neutral';
 }
 
-
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const user = session?.user;
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  if (!session || !user) {
-    return null; // or a loading spinner
+  const getUser = useCallback(async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const response = await fetch('/api/auth/user', {
+        signal: abortControllerRef.current.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const data = await response.json();
+      
+      if (data.user) {
+        setUserData({
+          username: data.user.username,
+          points: data.user.points,
+          telegramId: data.user.telegramId,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Error fetching user data:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user) return;
+
+    getUser();
+
+    const pollData = () => {
+      pollingTimeoutRef.current = setTimeout(() => {
+        getUser();
+        pollData();
+      }, 10000);
+    };
+
+    pollData();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+      }
+    };
+  }, [session, getUser]);
+
+  if (!userData) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   const quickLinks = [
@@ -72,7 +143,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Welcome back, <span className='capitalize'>{user.username || 'User'}</span>
+            Welcome back, <span className='capitalize'>{userData.username || 'User'}</span>
           </h1>
         </div>
         <Link
@@ -94,7 +165,7 @@ export default function DashboardPage() {
             <Link
               href="/connect-telegram"
               className={`flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border ${
-                user.telegramId ? 'border-green-500' : 'border-red-500'
+                userData.telegramId ? 'border-green-500' : 'border-red-500'
               } hover:border-blue-500 dark:hover:border-blue-500 transition-colors`}
             >
               <div className="flex-1">
@@ -105,7 +176,7 @@ export default function DashboardPage() {
                   Connect to UST Telegram bot for realtime logs
                 </p>
               </div>
-              {user.telegramId ? (
+              {userData.telegramId ? (
                 <CheckCircleIcon className="h-5 w-5 text-green-500" />
               ) : (
                 <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
