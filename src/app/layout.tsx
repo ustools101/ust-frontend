@@ -21,7 +21,28 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ultimate Social Tools",
-  description: "Ultimate Social Tools",
+  description: "Your all-in-one social media management solution",
+  manifest: '/manifest.json',
+  icons: {
+    apple: [
+      { url: '/icons/icon-192x192.png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512' }
+    ],
+  },
+  themeColor: '#111827',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Ultimate Social Tools',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default async function RootLayout({
