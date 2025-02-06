@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { ShareIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface IOSInstallModalProps {
   isOpen: boolean;
@@ -39,7 +39,19 @@ export default function IOSInstallModal({ isOpen, onClose }: IOSInstallModalProp
               <Dialog.Panel className="relative transform overflow-hidden rounded-t-xl bg-white dark:bg-gray-900 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full sm:max-w-lg">
                 <div>
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-                    <ShareIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" aria-hidden="true" />
+                    <svg 
+                      className="h-6 w-6 text-primary-600 dark:text-primary-400" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                      />
+                    </svg>
                   </div>
                   <div className="mt-3 text-center">
                     <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
@@ -56,7 +68,19 @@ export default function IOSInstallModal({ isOpen, onClose }: IOSInstallModalProp
                 <div className="mt-5 space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-                      <ShareIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                      <svg 
+                        className="h-5 w-5 text-gray-600 dark:text-gray-400" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                        />
+                      </svg>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                       1. Tap the Share button in Safari's menu bar

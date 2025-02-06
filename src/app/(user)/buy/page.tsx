@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CreditCardIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import dynamic from 'next/dynamic';
+import PaystackPop from '@paystack/inline-js';
 
-declare global {
-  interface Window {
-    PaystackPop: any;
-  }
+interface PaystackResponse {
+  reference: string;
+  status: string;
 }
 
 export default function BuyCreditsPage() {
@@ -18,34 +17,39 @@ export default function BuyCreditsPage() {
   const [amount, setAmount] = useState<number>(1000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
-  const [paystackLoaded, setPaystackLoaded] = useState(false);
-
-  useEffect(() => {
-    // Load Paystack script
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = () => setPaystackLoaded(true);
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     setAmount(value);
   };
 
+  const verifyPayment = useCallback(async (reference: string) => {
+    try {
+      const verifyResponse = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reference }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok) {
+        throw new Error(verifyData.error || 'Payment verification failed');
+      }
+
+      toast.success('Payment successful! Credits added to your account.');
+      router.push('/credits');
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error('Failed to verify payment. Please contact support.');
+    }
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!paystackLoaded) {
-      toast.error('Payment system is still loading. Please try again.');
-      return;
-    }
-
     if (!amount || amount < 1000) {
       toast.error('Minimum amount is 1,000 credits');
       return;
@@ -59,7 +63,6 @@ export default function BuyCreditsPage() {
     setIsProcessing(true);
     
     try {
-      // Initialize payment
       const response = await fetch('/api/payment/initialize', {
         method: 'POST',
         headers: {
@@ -77,46 +80,21 @@ export default function BuyCreditsPage() {
         throw new Error(data.error || 'Failed to initialize payment');
       }
 
-      // Initialize Paystack popup
-      const handler = window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-        email: session?.user?.email,
+      const paystack = new PaystackPop();
+      paystack.newTransaction({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+        email: session?.user?.email.toString()!,
         amount: amount * 100,
-        ref: data.reference,
+        ref: data?.reference,
         access_code: data.access_code,
         onClose: () => {
           toast.error('Payment cancelled');
           setIsProcessing(false);
         },
-        callback: async (response: any) => {
-          try {
-            // Verify the payment
-            const verifyResponse = await fetch('/api/payment/verify', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                reference: response.reference,
-              }),
-            });
-
-            const verifyData = await verifyResponse.json();
-
-            if (!verifyResponse.ok) {
-              throw new Error(verifyData.error || 'Payment verification failed');
-            }
-
-            toast.success('Payment successful! Credits added to your account.');
-            router.push('/credits');
-          } catch (error) {
-            console.error('Verification error:', error);
-            toast.error('Failed to verify payment. Please contact support.');
-          }
-        },
+        callback: async (response: PaystackResponse) => {
+          await verifyPayment(response.reference);
+        }
       });
-
-      handler.openIframe();
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Failed to process payment. Please try again.');
@@ -197,7 +175,7 @@ export default function BuyCreditsPage() {
           <div>
             <button
               type="submit"
-              disabled={isProcessing || amount < 1000 || amount > 1000000 || !paystackLoaded}
+              disabled={isProcessing || amount < 1000 || amount > 1000000}
               className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isProcessing ? (

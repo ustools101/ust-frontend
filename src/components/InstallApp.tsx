@@ -18,7 +18,7 @@ export default function InstallApp() {
     const hasUserDismissed = localStorage.getItem('pwa-prompt-dismissed');
 
     // Check if device is iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window?.MSStream;
     setIsIOS(isIOSDevice);
 
     if (!isAppInstalled && !hasUserDismissed) {
