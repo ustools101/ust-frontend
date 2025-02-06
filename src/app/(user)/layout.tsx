@@ -11,6 +11,7 @@ import {
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 import Navigation from '@/components/Navigation';
+import InstallApp from '@/components/InstallApp';
 
 interface NavItem {
   path: string;
@@ -54,6 +55,7 @@ export default function UserLayout({
   return (
     <>
       <Navigation />
+      <InstallApp />
       <div className="min-h-screen bg-background flex flex-col">
         {/* Main content */}
         <main className="flex-1 container mx-auto px-4 pb-20 pt-20">
