@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CreditCardIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import PaystackPop from '@paystack/inline-js';
 
 interface PaystackResponse {
   reference: string;
@@ -17,6 +16,14 @@ export default function BuyCreditsPage() {
   const [amount, setAmount] = useState<number>(1000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const [PaystackPop, setPaystackPop] = useState<any>(null);
+
+  // Load Paystack on client-side only
+  useEffect(() => {
+    import('@paystack/inline-js').then((module) => {
+      setPaystackPop(() => module.default);
+    });
+  }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -61,7 +68,7 @@ export default function BuyCreditsPage() {
     }
 
     setIsProcessing(true);
-    
+
     try {
       const response = await fetch('/api/payment/initialize', {
         method: 'POST',
@@ -80,11 +87,14 @@ export default function BuyCreditsPage() {
         throw new Error(data.error || 'Failed to initialize payment');
       }
 
+      if (!PaystackPop) {
+        throw new Error('Paystack is not loaded yet.');
+      }
+
       const paystack = new PaystackPop();
-      // @ts-ignore
       paystack.newTransaction({
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-        email: session?.user?.email.toString()!,
+        email: session?.user?.email!,
         amount: amount * 100,
         ref: data?.reference,
         access_code: data.access_code,
