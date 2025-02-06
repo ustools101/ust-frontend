@@ -55,7 +55,6 @@ export const metadata: Metadata = {
     // iPhone 14
     "apple-touch-startup-image-1179x2556": "/splash/splash-iPhone14.png",
     // iPhone 13 Pro
-    "apple-touch-startup-image-1170x2532": "/splash/splash-iPhone13Pro.png",
     // iPhone 12 Mini
     "apple-touch-startup-image-1080x2340": "/splash/splash-iPhone12Mini.png",
     // iPhone X

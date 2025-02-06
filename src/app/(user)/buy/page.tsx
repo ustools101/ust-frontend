@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CreditCardIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import PaystackPop from '@paystack/inline-js'
+import dynamic from 'next/dynamic';
 
 declare global {
   interface Window {
@@ -18,6 +18,20 @@ export default function BuyCreditsPage() {
   const [amount, setAmount] = useState<number>(1000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load Paystack script
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.onload = () => setPaystackLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -27,6 +41,11 @@ export default function BuyCreditsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!paystackLoaded) {
+      toast.error('Payment system is still loading. Please try again.');
+      return;
+    }
+
     if (!amount || amount < 1000) {
       toast.error('Minimum amount is 1,000 credits');
       return;
@@ -59,7 +78,7 @@ export default function BuyCreditsPage() {
       }
 
       // Initialize Paystack popup
-      const handler = PaystackPop.setup({
+      const handler = window.PaystackPop.setup({
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
         email: session?.user?.email,
         amount: amount * 100,
@@ -99,7 +118,7 @@ export default function BuyCreditsPage() {
 
       handler.openIframe();
     } catch (error) {
-      console.error('Payment failed:', error);
+      console.error('Payment error:', error);
       toast.error('Failed to process payment. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -178,7 +197,7 @@ export default function BuyCreditsPage() {
           <div>
             <button
               type="submit"
-              disabled={isProcessing || amount < 1000 || amount > 1000000}
+              disabled={isProcessing || amount < 1000 || amount > 1000000 || !paystackLoaded}
               className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isProcessing ? (

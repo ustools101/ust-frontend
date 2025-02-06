@@ -9,22 +9,33 @@ import { usePathname } from 'next/navigation';
 export default function Navigation() {
   const { data: session } = useSession();
   const [points, setPoints] = useState<number | undefined>(undefined);
+  const [polling, setPolling] = useState(false);
 
   const getUser = async () => {
-    if(session?.user){
+    try {
       const response = await fetch('/api/auth/user');
       const data = await response.json();
-      setPoints(data.user.points);
+      if (data.user?.points !== undefined) {
+        setPoints(data.user.points);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
-    setTimeout(() => {
-      getUser();
-    }, 10000);
   }
 
+  useEffect(() => {
+    if (!session?.user || polling) return;
 
-  useEffect(()=> {
+    setPolling(true);
     getUser();
-  },[])
+
+    const interval = setInterval(getUser, 10000);
+
+    return () => {
+      setPolling(false);
+      clearInterval(interval);
+    };
+  }, [session]);
 
   return (
     <nav className="border-b dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm fixed w-full top-0 z-50">
@@ -35,40 +46,31 @@ export default function Navigation() {
               UST
             </Link>
           </div>
-          
-          <div className="flex items-center space-x-6">
-            {session ? (
+
+          <div className="flex items-center space-x-4">
+            {session?.user && (
               <>
                 <div className="flex items-center space-x-3 bg-gray-100 dark:bg-gray-800 py-1.5 px-3 rounded-full">
                   <CreditCardIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {points?.toLocaleString()} C
+                    {points?.toLocaleString() || '...'} C
                   </span>
                   <Link
                     href="/buy"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                    className="text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400"
                   >
                     Buy
                   </Link>
                 </div>
+
                 <button
-                  onClick={() => signOut({
-                    callbackUrl: '/signin'
-                  })}
-                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors group"
+                  onClick={() => signOut({ callbackUrl: '/signin' })}
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                 >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5 group-hover:text-blue-600" />
-                  <span>Sign Out</span>
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  <span>Logout</span>
                 </button>
               </>
-            ) : (
-              <Link 
-                href="/signin" 
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                <span>Sign In</span>
-              </Link>
             )}
           </div>
         </div>
