@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --glitch-duration: 3s;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,4 +19,100 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Glitch Effect */
+.glitch-text {
+  animation: glitch var(--glitch-duration) infinite;
+}
+
+.glitch-1 {
+  clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+  transform: translate(-4px, -4px);
+  animation: glitch-1 var(--glitch-duration) infinite linear alternate-reverse;
+  opacity: 0.75;
+}
+
+.glitch-2 {
+  clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+  transform: translate(4px, 4px);
+  animation: glitch-2 var(--glitch-duration) infinite linear alternate-reverse;
+  opacity: 0.75;
+}
+
+/* Scan line effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* Glitch animations */
+@keyframes glitch {
+  0% {
+    text-shadow: 0.05em 0 0 #86C232, -0.05em -0.025em 0 #86C23280;
+  }
+  14% {
+    text-shadow: 0.05em 0 0 #86C232, -0.05em -0.025em 0 #86C23280;
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 #86C232, 0.025em 0.025em 0 #86C23280;
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 #86C232, 0.025em 0.025em 0 #86C23280;
+  }
+  50% {
+    text-shadow: 0.025em 0.05em 0 #86C232, 0.05em 0 0 #86C23280;
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 #86C232, 0.05em 0 0 #86C23280;
+  }
+  100% {
+    text-shadow: -0.025em 0 0 #86C232, -0.025em -0.025em 0 #86C23280;
+  }
+}
+
+@keyframes glitch-1 {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-4px, 4px);
+  }
+  40% {
+    transform: translate(-4px, -4px);
+  }
+  60% {
+    transform: translate(4px, 4px);
+  }
+  80% {
+    transform: translate(4px, -4px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+@keyframes glitch-2 {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(4px, 4px);
+  }
+  40% {
+    transform: translate(4px, -4px);
+  }
+  60% {
+    transform: translate(-4px, 4px);
+  }
+  80% {
+    transform: translate(-4px, -4px);
+  }
+  100% {
+    transform: translate(0);
+  }
 }
