@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen mt-20 bg-secondary-900 relative overflow-hidden">
+    <div className="min-h-screen bg-secondary-900 relative overflow-hidden">
       {/* Matrix-like background overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#86C23233,transparent_2px)] bg-[size:4px_100%] z-0"></div>
       <div className="absolute inset-0 bg-[linear-gradient(transparent,#86C23215)] z-0"></div>

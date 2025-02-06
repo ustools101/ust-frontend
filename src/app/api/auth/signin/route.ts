@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         await connectDB();
         
         // Find user but include password for comparison
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase() });
         
         if(!user) {
             return NextResponse.json({

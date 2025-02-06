@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Create new user with sanitized username
     const newUser = new User({
         email: email.toLowerCase(),
-        username: sanitizedUsername,
+        username: sanitizedUsername.toLowerCase(),
         password: hash
     });
     await newUser.save();
