@@ -6,8 +6,8 @@ import { authOptions } from './api/auth/[...nextauth]/route';
 import AuthProvider from '@/components/providers/session-provider';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
-import Navigation from '@/components/Navigation';
 import { Analytics } from "@vercel/analytics/react"
+import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,6 +54,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="dark">
+      <Head>
+        <link rel="manifest" href="/manifest.json" />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen`}
       >
@@ -61,7 +64,6 @@ export default async function RootLayout({
         <AuthProvider session={session}>
           <ThemeProvider>
             <Toaster />
-            <Navigation />
             {children}
           </ThemeProvider>
         </AuthProvider>

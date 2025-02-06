@@ -10,6 +10,7 @@ import {
   LinkIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
+import Navigation from '@/components/Navigation';
 
 interface NavItem {
   path: string;
@@ -51,36 +52,39 @@ export default function UserLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Main content */}
-      <main className="flex-1 container mx-auto px-4 pb-20 pt-20">
-        {children}
-      </main>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Main content */}
+        <main className="flex-1 container mx-auto px-4 pb-20 pt-20">
+          {children}
+        </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/98 backdrop-blur-lg border-t border-primary-800 px-4 py-2">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="flex justify-between items-center">
-            {navItems.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`flex flex-col items-center p-2 transition-colors duration-200
-                    ${isActive 
-                      ? 'text-primary-400' 
-                      : 'text-gray-400 hover:text-primary-400'
-                    }`}
-                >
-                  <item.icon className="h-6 w-6" />
-                  <span className="text-xs mt-1">{item.label}</span>
-                </Link>
-              );
-            })}
+        {/* Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/98 backdrop-blur-lg border-t border-primary-800 px-4 py-2">
+          <div className="max-w-screen-xl mx-auto">
+            <div className="flex justify-between items-center">
+              {navItems.map((item) => {
+                const isActive = pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`flex flex-col items-center p-2 transition-colors duration-200
+                      ${isActive 
+                        ? 'text-primary-400' 
+                        : 'text-gray-400 hover:text-primary-400'
+                      }`}
+                  >
+                    <item.icon className="h-6 w-6" />
+                    <span className="text-xs mt-1">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </nav>
-    </div>
+        </nav>
+      </div>
+    </>
   );
 }

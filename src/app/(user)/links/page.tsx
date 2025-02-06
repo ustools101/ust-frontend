@@ -151,7 +151,7 @@ export default function LinksPage() {
               {/* Card Header with Image */}
               <div className="relative h-48 w-full">
                 <Image
-                  src={link.image}
+                  src={link.image.toString()}
                   alt={"Link image"}
                   fill
                   className="object-cover"
