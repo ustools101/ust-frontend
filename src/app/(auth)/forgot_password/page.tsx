@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
                 </li>
                 
                 <li className="text-gray-400">
-                  Follow the bot's instructions to complete your password reset
+                  Follow the bot&apos;s instructions to complete your password reset
                 </li>
               </ol>
             </div>

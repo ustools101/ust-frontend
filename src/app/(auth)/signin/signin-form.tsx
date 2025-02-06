@@ -137,7 +137,7 @@ export default function SigninForm() {
 
       {/* Signup Link */}
       <div className="mt-6 text-center font-mono text-sm">
-        <span className="text-secondary-400">Don't have an account? </span>
+        <span className="text-secondary-400">Don&apos;t have an account? </span>
         <Link href="/signup" className="text-primary-400 hover:text-primary-300 transition-colors duration-200">
           ./signup.sh
         </Link>

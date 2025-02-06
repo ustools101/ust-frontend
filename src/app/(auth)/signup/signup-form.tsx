@@ -13,10 +13,6 @@ interface SignupFormData {
   confirmPassword: string;
 }
 
-interface FieldError {
-  message: string;
-}
-
 interface FormErrors {
   email?: string;
   username?: string;
