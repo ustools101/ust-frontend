@@ -19,12 +19,14 @@ export default function BuyCreditsPage() {
   const [amount, setAmount] = useState<number>(1000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (mounted) {
       PaystackPopInstance = PaystackPop;
     }
-  }, []);
+    setMounted(true);
+  }, [mounted]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
