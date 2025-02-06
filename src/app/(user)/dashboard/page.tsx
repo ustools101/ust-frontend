@@ -184,7 +184,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="https://t.me/ust_tutorials"
+              href="https://t.me/+VoV4GcwY4KtjZmI8"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="https://t.me/ust_updates"
+              href="https://t.me/+MuFvi512b7NiMWI0"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"

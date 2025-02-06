@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/react"
 import Head from "next/head";
+import TelegramSupport from '@/components/TelegramSupport';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -140,6 +141,7 @@ export default async function RootLayout({
           <ThemeProvider>
             <Toaster />
             {children}
+            <TelegramSupport />
           </ThemeProvider>
         </CustomSessionProvider>
       </body>
