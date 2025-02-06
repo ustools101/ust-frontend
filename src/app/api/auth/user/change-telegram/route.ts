@@ -19,7 +19,11 @@ export async function POST(request: NextRequest) {
     }
 
     await connectToDatabase();
-
+    // check if a user already has it
+    const idExists = await User.findOne({telegramId});
+    if(idExists){
+      return  NextResponse.json({ error: "Someone is already using this ID" }, { status: 400 });
+    }
     // Update user's telegram ID
     const user = await User.findByIdAndUpdate(
       session.user.id,
