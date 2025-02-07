@@ -18,7 +18,7 @@ const userSchema = new Schema<IUser>({
     },
     points: {
         type: Number,
-        default: 0,
+        default: 4000,
     },
     telegramId: {
         type: Number,

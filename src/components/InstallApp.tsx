@@ -10,6 +10,7 @@ export default function InstallApp() {
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
 
+
   useEffect(() => {
     // Check if the app is already installed
     const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches;
