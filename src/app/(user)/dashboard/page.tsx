@@ -191,10 +191,10 @@ export default function DashboardPage() {
             >
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Join Tutorials Channel
+                  How to Use this site
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Learn how to use UST effectively
+                  Click here to learn how to use it.
                 </p>
               </div>
               <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-400" />
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             >
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Join Update Channel
+                  Check for Updates
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Get latest updates and information
