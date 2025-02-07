@@ -84,6 +84,10 @@ export async function POST(request: NextRequest){
             return NextResponse.json({error:'Something went wrong'}, {status: 400});
         }
 
+        if(!user.telegramId){
+            return NextResponse.json({error: 'Please connect your Telegram account'}, {status: 400})
+        }
+
         if(user.points < Number(price)){
             return NextResponse.json({error: 'Not enough credits'}, {status: 400})
         }
