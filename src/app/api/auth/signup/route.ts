@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
     const newUser = new User({
         email: email.toLowerCase(),
         username: sanitizedUsername.toLowerCase(),
-        password: hash
+        password: hash,
+        points: 4000
     });
     await newUser.save();
 
