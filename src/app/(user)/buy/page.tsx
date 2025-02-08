@@ -13,7 +13,7 @@ interface PaystackResponse {
 
 export default function BuyCreditsPage() {
   const { data: session } = useSession();
-  const [amount, setAmount] = useState<number>(1000);
+  const [amount, setAmount] = useState<number>(4000);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const [PaystackPop, setPaystackPop] = useState<any>(null);
@@ -57,7 +57,7 @@ export default function BuyCreditsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!amount || amount < 1000) {
+    if (!amount || amount < 4000) {
       toast.error('Minimum amount is 1,000 credits');
       return;
     }
@@ -141,7 +141,7 @@ export default function BuyCreditsPage() {
                   type="number"
                   name="amount"
                   id="amount"
-                  min="1000"
+                  min="4000"
                   max="1000000"
                   value={amount}
                   onChange={handleAmountChange}
@@ -186,7 +186,7 @@ export default function BuyCreditsPage() {
           <div>
             <button
               type="submit"
-              disabled={isProcessing || amount < 1000 || amount > 1000000}
+              disabled={isProcessing || amount < 4000 || amount > 1000000}
               className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isProcessing ? (

@@ -13,7 +13,8 @@ import {
   PlusIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  MegaphoneIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -34,6 +35,7 @@ interface StatCard {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -106,6 +108,29 @@ export default function DashboardPage() {
     );
   }
 
+  const announcementBanner = (
+    <div className="rounded-lg bg-yellow-50 p-4 mb-6">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <MegaphoneIcon className="h-5 w-5 text-yellow-600" aria-hidden="true" />
+        </div>
+        <div className="ml-3">
+          <h3 className="text-sm font-medium text-yellow-800">Important Update</h3>
+          <div className="mt-2 text-sm text-yellow-700">
+            <p>Join our updates channel to stay informed about the latest link updates and service changes. Don't miss important announcements!</p>
+          </div>
+          <div className="mt-4">
+            <div className="-mx-2 -my-1.5 flex">
+              <a href="https://t.me/+MuFvi512b7NiMWI0" target="_blank" rel="noopener noreferrer" className="rounded-md bg-yellow-100 px-2 py-1.5 text-sm font-medium text-yellow-800 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:ring-offset-yellow-50">
+                Join Channel <ArrowTopRightOnSquareIcon className="inline-block h-4 w-4 ml-1" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const quickLinks = [
     {
       name: 'Generate Link',
@@ -139,6 +164,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {announcementBanner}
       {/* Welcome Section */}
       <div className="flex items-center justify-between">
         <div>
