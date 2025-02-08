@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         email: email.toLowerCase(),
         username: sanitizedUsername.toLowerCase(),
         password: hash,
-        points: 4000
+        points: 0
     });
     await newUser.save();
 

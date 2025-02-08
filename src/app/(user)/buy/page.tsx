@@ -149,7 +149,7 @@ export default function BuyCreditsPage() {
                 />
               </div>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Min: 1,000 credits • Max: 1,000,000 credits
+                Min: 4,000 credits • Max: 1,000,000 credits
               </p>
             </div>
 
