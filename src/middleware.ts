@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     // Add security headers
     const headers = new Headers(req.headers);
     headers.set("x-frame-options", "DENY");
@@ -16,6 +16,15 @@ export default withAuth(
       "content-security-policy",
       "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
     );
+
+    // Check for admin routes
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+      const token = req.nextauth.token;
+      
+      if (!token?.email || token.role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
+    }
 
     return NextResponse.next({
       request: {
@@ -33,10 +42,11 @@ export default withAuth(
   }
 );
 
-// Protect all routes under /dashboard and /api (except auth endpoints)
+// Protect all routes under /dashboard, /admin, and /api (except auth endpoints)
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/admin/:path*",
     "/links/:path*",
     "/credits/:path*",
     "/profile/:path*",
