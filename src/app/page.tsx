@@ -1,7 +1,16 @@
+"use client"
+
 import Link from 'next/link';
 import { FiLock, FiBarChart, FiLayout } from 'react-icons/fi';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  if(session?.user){
+    router.push('/dashboard');
+  }
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
       {/* Hero Section */}
