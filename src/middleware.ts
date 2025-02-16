@@ -52,6 +52,5 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/api/:path*",
-    "/((?!api/auth|signin|signup|forgot_password|manifest.json|_next/static|_next/image|favicon.ico|icons/|screenshots/|public/).*)",
   ],
 };
