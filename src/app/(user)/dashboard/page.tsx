@@ -117,14 +117,7 @@ export default function DashboardPage() {
         <div className="ml-3">
           <h3 className="text-sm font-medium text-yellow-800">Important Update</h3>
           <div className="mt-2 text-sm text-yellow-700">
-            <p>Join our updates channel to stay informed about the latest link updates and service changes. Don't miss important announcements!</p>
-          </div>
-          <div className="mt-4">
-            <div className="-mx-2 -my-1.5 flex">
-              <a href="https://t.me/+MuFvi512b7NiMWI0" target="_blank" rel="noopener noreferrer" className="rounded-md bg-yellow-100 px-2 py-1.5 text-sm font-medium text-yellow-800 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:ring-offset-yellow-50">
-                Join Channel <ArrowTopRightOnSquareIcon className="inline-block h-4 w-4 ml-1" />
-              </a>
-            </div>
+            <p>Join our tutorial and updates channel to stay informed and learn how to use USTools!</p>
           </div>
         </div>
       </div>
@@ -217,7 +210,7 @@ export default function DashboardPage() {
             >
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  How to Use this site
+                  Tutorials Channel
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Click here to learn how to use it.
@@ -234,7 +227,7 @@ export default function DashboardPage() {
             >
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Check for Updates
+                  Updates Channel
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Get latest updates and information
