@@ -18,6 +18,7 @@ export default interface ILink {
     image: String;
     bannerImage?: String;
     otpEnabled?: Boolean;
+    retry?: Number;
     updatedAt?: Date;
     createdAt?: Date;   
 }

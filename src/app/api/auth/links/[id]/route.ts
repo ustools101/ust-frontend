@@ -59,7 +59,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { title, contestantName, linkName, linktype, writeup, image, bannerImage } = body;
+    const { title, contestantName, linkName, linktype, writeup, image, bannerImage, retry, askForOtp } = body;
 
 
     // Input validation
@@ -90,11 +90,8 @@ export async function POST(
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    await Link.updateOne(
-      {
-        _id: new ObjectId(id),
-        userId: session.user.id,
-      },
+    const updatedLink = await Link.findByIdAndUpdate(
+      id,
       {
         $set: {
           title: title || existingLink.title,
@@ -102,12 +99,15 @@ export async function POST(
           linkName: linkName || existingLink.linkName,
           writeup: writeup || existingLink.writeup,
           image: image || existingLink.image,
-          bannerImage: bannerImage || existingLink.bannerImage
+          bannerImage: bannerImage || existingLink.bannerImage,
+          retry: retry || 1,
+          otpEnabled: askForOtp !== undefined ? askForOtp : existingLink.otpEnabled
         },
-      }
+      },
+      { new: true }
     );
 
-    return NextResponse.json({ message: "Link updated successfully" });
+    return NextResponse.json({ message: "Link updated successfully", data: updatedLink });
   } catch (error) {
     console.error("Error updating link:", error);
     return NextResponse.json(

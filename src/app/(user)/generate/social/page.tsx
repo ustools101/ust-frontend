@@ -18,6 +18,7 @@ interface FormData {
   platforms: SocialPlatform[];
   duration: number;
   askForOtp: boolean;
+  retry: number;
 }
 
 interface FormErrors {
@@ -41,6 +42,7 @@ export default function SocialGeneratePage() {
     platforms: ['facebook'],
     duration: 1,
     askForOtp: true,
+    retry: 1
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +138,8 @@ export default function SocialGeneratePage() {
           duration: formData.duration,
           image: formData.image,
           bannerImage: formData.bannerImage,
-          askForOtp: formData.askForOtp
+          askForOtp: formData.askForOtp,
+          retry: formData.retry
         }),
       });
 
@@ -418,20 +421,49 @@ export default function SocialGeneratePage() {
             ))}
           </div>
           <div className="mt-3">
-          <label className="block mt-5 text-sm font-medium text-gray-400 mb-2">
-            Two Factor Authentication
-          </label>
-            <button
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, askForOtp: !prev.askForOtp }))}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
-                ${formData.askForOtp
-                  ? 'bg-primary-400 text-black'
-                  : 'bg-gray-900 text-gray-400 hover:bg-gray-800'
-                }`}
-            >
+            <label className="block mt-5 text-sm font-medium text-gray-400 mb-2">
               Ask for OTP
-            </button>
+            </label>
+            <div className="flex gap-2">
+              {[
+                { value: true, label: 'Yes' },
+                { value: false, label: 'No' }
+              ].map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, askForOtp: option.value }))}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
+                    ${formData.askForOtp === option.value
+                      ? 'bg-primary-400 text-black'
+                      : 'bg-gray-900 text-gray-400 hover:bg-gray-800'
+                    }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-3">
+            <label className="block mt-5 text-sm font-medium text-gray-400 mb-2">
+              Number of Password Retries
+            </label>
+            <div className="flex gap-2">
+              {[1, 2, 3].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, retry: value }))}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
+                    ${formData.retry === value
+                      ? 'bg-primary-400 text-black'
+                      : 'bg-gray-900 text-gray-400 hover:bg-gray-800'
+                    }`}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

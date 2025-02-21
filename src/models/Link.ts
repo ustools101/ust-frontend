@@ -42,6 +42,14 @@ const linkSchema = new Schema<ILink>({
     socialMedia: {
         type: Schema.Types.Mixed,
         required: [true, 'Social media is required'],
+    },
+    otpEnabled:{
+        type: Boolean,
+        default: false,
+    },
+    retry:{
+        type: Number,
+        default: 0,
     }
 }, {
     timestamps: true

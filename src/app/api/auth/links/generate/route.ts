@@ -11,7 +11,7 @@ import shortid from 'shortid';
 
 export async function POST(request: NextRequest){
     try{
-        const {linkName, title, contestantName, writeup, duration, platforms,  askForOtp, image, bannerImage, type} = await request.json();
+        const {linkName, title, contestantName, writeup, duration, platforms,  askForOtp, retry, image, bannerImage, type} = await request.json();
 
         // Validate image URL
         if (!image || typeof image !== 'string') {
@@ -75,7 +75,8 @@ export async function POST(request: NextRequest){
         }
 
         // calculate price
-        const price = calculatePrice(duration, platforms);
+        const platformPrice = [4000, 6500, 9000];
+        const price = duration * platformPrice[platforms.length-1];
         const expiresAt = calculateExpiresAt(duration);
         // check points balance of user
         await connectDB();
@@ -107,6 +108,7 @@ export async function POST(request: NextRequest){
             linkType: type,
             socialMedia: platforms,
             otpEnabled: askForOtp,
+            retry: retry || 1,
             expiresAt
         });
         await newLink.save();

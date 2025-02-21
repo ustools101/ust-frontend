@@ -37,6 +37,8 @@ export default function LinkDetails() {
     linkUrl: '',
     linkId: '',
     socialMedia: [],
+    retry: 1,
+    askForOtp: true,
   });
 
   const socialLinkHostAddress = process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST;
@@ -69,6 +71,8 @@ export default function LinkDetails() {
       if (data.contestantName) newFormData.contestantName = data.contestantName;
       if (data.linkUrl) newFormData.linkUrl = data.linkUrl;
       if(data.socialMedia) newFormData.socialMedia = data.socialMedia;
+      if(data.retry) newFormData.retry = data.retry;
+      if(data.otpEnabled !== undefined) newFormData.askForOtp = data.otpEnabled;
 
       if(data.socialMedia.length === 1) setPricePerWeek(4000);
       if(data.socialMedia.length === 2) setPricePerWeek(6500);
@@ -493,7 +497,6 @@ export default function LinkDetails() {
                 </div>
               </div>
 
-
               <div>
                 <label 
                   htmlFor="expiresAt" 
@@ -517,6 +520,55 @@ export default function LinkDetails() {
                              cursor-not-allowed
                              sm:text-sm sm:leading-6"
                   />
+                </div>
+              </div>
+
+              {/* Ask for OTP */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Ask for OTP
+                </label>
+                <div className="flex gap-2">
+                  {[
+                    { value: true, label: 'Yes' },
+                    { value: false, label: 'No' }
+                  ].map((option) => (
+                    <button
+                      key={option.label}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, askForOtp: option.value }))}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
+                        ${formData.askForOtp === option.value
+                          ? 'bg-primary-400 text-black'
+                          : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Number of Password Retries */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Number of Password Retries
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, retry: value }))}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
+                        ${formData.retry === value
+                          ? 'bg-primary-400 text-black'
+                          : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
                 </div>
               </div>
 
