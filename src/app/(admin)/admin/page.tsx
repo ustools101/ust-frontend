@@ -171,7 +171,7 @@ export default function AdminDashboard() {
 
               setIsCrediting(true);
               try {
-                const response = await fetch('/api/admin/credit-user', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST}/api/credits/add`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
