@@ -171,7 +171,7 @@ export default function AdminDashboard() {
 
               setIsCrediting(true);
               try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST}/api/credits/add`, {
+                const response = await fetch('/api/admin/credit-user', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
@@ -184,6 +184,14 @@ export default function AdminDashboard() {
                 if (!response.ok) {
                   throw new Error(data.error || 'Failed to credit user');
                 }
+
+                await fetch(`${process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST}/api/credits/add`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ email, amount }),
+                });
 
                 toast.success(`Successfully credited ${amount} points to ${email}`);
                 
