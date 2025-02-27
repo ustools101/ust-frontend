@@ -99,36 +99,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Log the credit operation
-        console.log(`Admin ${session.user.email} credited ${amount} points to user ${email}`);
-
-        // Send credit information to external server
-        try {
-            const serverUrl = process.env.SERVER_URL;
-            if (!serverUrl) {
-                throw new Error('SERVER_URL not configured');
-            }
-
-            const externalResponse = await fetch(`${serverUrl}/credits/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, amount }),
-            });
-
-            if (!externalResponse.ok) {
-                const errorData = await externalResponse.json();
-                console.error('External server error:', errorData);
-                // We don't throw here to avoid rolling back the credit
-                // but we log the error for monitoring
-            }
-        } catch (error) {
-            console.error('Failed to notify external server:', error);
-            // We don't throw here to avoid rolling back the credit
-            // but we log the error for monitoring
-        }
-
         return new NextResponse(
             JSON.stringify({
                 message: "Points credited successfully",
