@@ -26,7 +26,7 @@ export default function Home() {
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
-                Professional Phishing
+                Best Phishing
               </span>
               <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-blue-600">
