@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Invalid credentials");
           }
 
-          const baseUrl = process.env.NEXTAUTH_URL || 'http://192.168.1.168:3000';
+          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
             method: "POST",
             body: JSON.stringify({
