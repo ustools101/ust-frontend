@@ -208,10 +208,14 @@ export default function SocialGeneratePage() {
     const basePrice = 4000; // Base price for first platform
     const additionalPrice = 2500; // Price for each additional platform
     const additionalPlatforms = formData.platforms.length - 1;
-    const platformTotal = basePrice + (additionalPlatforms > 0 ? additionalPlatforms * additionalPrice : 0);
+    
+    // For 3 days (0.5), base price is halved
+    const effectiveBasePrice = formData.duration === 0.5 ? basePrice / 2 : basePrice;
+    const platformTotal = effectiveBasePrice + (additionalPlatforms > 0 ? additionalPlatforms * additionalPrice : 0);
     
     // Duration multipliers
     const durationMultipliers: Record<number, number> = {
+      0.5: 1,  // 3 days
       1: 1,
       2: 2,
       4: 4,
@@ -474,6 +478,7 @@ export default function SocialGeneratePage() {
           </label>
           <div className="flex flex-wrap gap-2">
             {[
+              { value: 0.5, label: '3 Days' },
               { value: 1, label: '1 Week' },
               { value: 2, label: '2 Weeks' },
               { value: 4, label: '1 Month' },

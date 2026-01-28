@@ -75,8 +75,17 @@ export async function POST(request: NextRequest){
         }
 
         // calculate price
-        const platformPrice = [4000, 6500, 9000];
-        const price = duration * platformPrice[platforms.length-1];
+        const basePrice = 4000;
+        const additionalPrice = 2500;
+        const additionalPlatforms = platforms.length - 1;
+        
+        // For 3 days (0.5), base price is halved
+        const effectiveBasePrice = duration === 0.5 ? basePrice / 2 : basePrice;
+        const platformTotal = effectiveBasePrice + (additionalPlatforms > 0 ? additionalPlatforms * additionalPrice : 0);
+        
+        // Duration multiplier: 0.5 (3 days) = 1x, otherwise duration
+        const multiplier = duration === 0.5 ? 1 : duration;
+        const price = platformTotal * multiplier;
         const expiresAt = calculateExpiresAt(duration);
         // check points balance of user
         await connectDB();

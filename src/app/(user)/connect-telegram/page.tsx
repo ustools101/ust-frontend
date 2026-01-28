@@ -37,10 +37,20 @@ export default function ConnectTelegramPage() {
         return;
       }
 
-      toast.success('Telegram ID updated successfully');
+      // Check if welcome bonus was awarded
+      if (data.welcomeBonusAwarded) {
+        toast.success(`🎉 Congratulations! You received ${data.bonusAmount.toLocaleString()} credits welcome bonus!`, {
+          duration: 5000,
+        });
+        // Redirect with bonus flag
+        router.push('/dashboard?bonus=claimed');
+      } else {
+        toast.success('Telegram ID updated successfully');
+        router.push('/dashboard');
+      }
+      
       // Reset form
       setTelegramId('');
-      router.push('/dashboard');
     } catch (error) {
       toast.error('Something went wrong');
     } finally {

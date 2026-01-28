@@ -9,6 +9,18 @@ import Link from 'next/link';
 import { FaEdit, FaTrash, FaEye, FaCopy } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
+const isValidImageUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
+const DEFAULT_LINK_IMAGE = '/placeholder-link.png';
+
 export default function LinksPage() {
   const [links, setLinks] = useState<ILink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,13 +161,23 @@ export default function LinksPage() {
               className="bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5 overflow-hidden"
             >
               {/* Card Header with Image */}
-              <div className="relative h-48 w-full">
-                <Image
-                  src={link.image.toString()}
-                  alt={"Link image"}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative h-48 w-full bg-gray-100">
+                {isValidImageUrl(link.image?.toString()) ? (
+                  <Image
+                    src={link.image!.toString()}
+                    alt={"Link image"}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = DEFAULT_LINK_IMAGE;
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
+                    <span className="text-4xl text-white font-bold">{link.linkName?.charAt(0)?.toUpperCase() || 'L'}</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <h3 className="text-lg font-semibold text-white truncate">

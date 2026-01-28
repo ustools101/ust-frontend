@@ -1,23 +1,25 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { 
   CreditCardIcon,
   LinkIcon,
-  ChartBarIcon,
-  ArrowTrendingUpIcon,
-  ClockIcon,
   Cog6ToothIcon,
-  UserIcon,
   PlusIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
   ArrowTopRightOnSquareIcon,
-  MegaphoneIcon
+  SparklesIcon,
+  ChartBarIcon,
+  ArrowRightIcon,
+  ShieldCheckIcon,
+  GiftIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface UserData {
   username: string;
@@ -25,18 +27,15 @@ interface UserData {
   telegramId?: string;
 }
 
-interface StatCard {
-  title: string;
-  value: string | number;
-  icon: React.ForwardRefExoticComponent<any>;
-  change?: string;
-  trend?: 'up' | 'down' | 'neutral';
-}
+const WELCOME_BONUS_AMOUNT = 2000;
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [showBonusCelebration, setShowBonusCelebration] = useState(false);
+  const [showBonusBanner, setShowBonusBanner] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -68,6 +67,7 @@ export default function DashboardPage() {
           points: data.user.points,
           telegramId: data.user.telegramId,
         });
+        setTimeout(() => setIsLoaded(true), 100);
       }
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
@@ -100,172 +100,370 @@ export default function DashboardPage() {
     };
   }, [session, getUser]);
 
+  // Check for bonus claimed query param
+  useEffect(() => {
+    if (searchParams.get('bonus') === 'claimed') {
+      setShowBonusCelebration(true);
+      // Clear the query param from URL without reload
+      window.history.replaceState({}, '', '/dashboard');
+      // Auto-hide celebration after 8 seconds
+      const timer = setTimeout(() => setShowBonusCelebration(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
+
+  const formatCredits = (credits: number) => {
+    return new Intl.NumberFormat('en-US').format(credits);
+  };
+
   if (!userData) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-primary-500/20 rounded-full"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 animate-pulse">Loading your dashboard...</p>
       </div>
     );
   }
 
-  const announcementBanner = (
-    <div className="rounded-lg bg-yellow-50 p-4 mb-6">
-      <div className="flex">
-        <div className="flex-shrink-0">
-          <MegaphoneIcon className="h-5 w-5 text-yellow-600" aria-hidden="true" />
-        </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-yellow-800">Important Update</h3>
-          <div className="mt-2 text-sm text-yellow-700">
-            <p>Join our tutorial and updates channel to stay informed and learn how to use USTools!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const quickLinks = [
+  const quickActions = [
     {
       name: 'Generate Link',
-      description: 'Create a new phishing link',
+      description: 'Create a new link',
       icon: PlusIcon,
       href: '/generate',
-      color: 'text-blue-500'
+      gradient: 'from-blue-500 to-indigo-600',
+      iconBg: 'bg-blue-500/10',
+      iconColor: 'text-blue-500',
     },
     {
       name: 'My Links',
-      description: 'View and manage your links',
+      description: 'View & manage links',
       icon: LinkIcon,
       href: '/links',
-      color: 'text-purple-500'
+      gradient: 'from-purple-500 to-pink-600',
+      iconBg: 'bg-purple-500/10',
+      iconColor: 'text-purple-500',
     },
     {
-      name: 'Buy Credits',
-      description: 'Top up your balance',
-      icon: CreditCardIcon,
-      href: '/buy',
-      color: 'text-green-500'
+      name: 'Analytics',
+      description: 'View performance',
+      icon: ChartBarIcon,
+      href: '/credits',
+      gradient: 'from-amber-500 to-orange-600',
+      iconBg: 'bg-amber-500/10',
+      iconColor: 'text-amber-500',
     },
     {
       name: 'Settings',
-      description: 'Manage your preferences',
+      description: 'Manage preferences',
       icon: Cog6ToothIcon,
       href: '/settings',
-      color: 'text-gray-500'
-    }
+      gradient: 'from-gray-500 to-slate-600',
+      iconBg: 'bg-gray-500/10',
+      iconColor: 'text-gray-500',
+    },
+  ];
+
+  const setupItems = [
+    {
+      title: 'Connect Telegram',
+      description: 'Get real-time notifications',
+      href: '/connect-telegram',
+      isComplete: !!userData.telegramId,
+      icon: ShieldCheckIcon,
+    },
+    {
+      title: 'Tutorials Channel',
+      description: 'Learn how to use USTools',
+      href: 'https://t.me/+VoV4GcwY4KtjZmI8',
+      isExternal: true,
+      icon: SparklesIcon,
+    },
   ];
 
   return (
-    <div className="space-y-8">
-      {announcementBanner}
-      {/* Welcome Section */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Welcome back, <span className='capitalize'>{userData.username || 'User'}</span>
-          </h1>
-        </div>
-        <Link
-          href="/profile"
-          className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-        >
-          <UserIcon className="h-5 w-5 mr-2" />
-          View Profile
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Required Actions */}
-        <div className="lg:col-span-4 space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Required Actions
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <Link
-              href="/connect-telegram"
-              className={`flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border ${
-                userData.telegramId ? 'border-green-500' : 'border-red-500'
-              } hover:border-blue-500 dark:hover:border-blue-500 transition-colors`}
+    <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      {/* Welcome Bonus Celebration Modal */}
+      {showBonusCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl animate-scaleIn">
+            <button
+              onClick={() => setShowBonusCelebration(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Connect Telegram Bot
-                </h3>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Connect to UST Telegram bot for realtime logs
-                </p>
-              </div>
-              {userData.telegramId ? (
-                <CheckCircleIcon className="h-5 w-5 text-green-500" />
-              ) : (
-                <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              )}
-            </Link>
-
-            <Link
-              href="https://t.me/+VoV4GcwY4KtjZmI8"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center animate-bounce">
+              <GiftIcon className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              🎉 Congratulations!
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              You&apos;ve successfully connected your Telegram and claimed your welcome bonus!
+            </p>
+            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-4 mb-6">
+              <p className="text-sm text-primary-600 dark:text-primary-400 mb-1">Bonus Credited</p>
+              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
+                +{WELCOME_BONUS_AMOUNT.toLocaleString()} Credits
+              </p>
+            </div>
+            <button
+              onClick={() => setShowBonusCelebration(false)}
+              className="w-full py-3 px-6 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors"
             >
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Tutorials Channel
-                </h3>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Click here to learn how to use it.
-                </p>
-              </div>
-              <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-400" />
-            </Link>
-
-            <Link
-              href="https://t.me/+MuFvi512b7NiMWI0"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
-            >
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Updates Channel
-                </h3>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Get latest updates and information
-                </p>
-              </div>
-              <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-400" />
-            </Link>
+              Start Exploring
+            </button>
           </div>
         </div>
+      )}
 
-        {/* Quick Actions */}
-        <div className="lg:col-span-4 space-y-6">
+      {/* Welcome Bonus Banner - Show only if Telegram not connected */}
+      {!userData.telegramId && showBonusBanner && (
+        <div 
+          className={`transform transition-all duration-500 ${
+            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+          }`}
+        >
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-4 sm:p-5 shadow-lg">
+            <button
+              onClick={() => setShowBonusBanner(false)}
+              className="absolute top-3 right-3 text-white/80 hover:text-white"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <GiftIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-bold text-base sm:text-lg">
+                  🎁 Claim Your {WELCOME_BONUS_AMOUNT.toLocaleString()} Credits Welcome Bonus!
+                </h3>
+                <p className="text-white/90 text-sm mt-0.5">
+                  Connect your Telegram to receive your free credits instantly.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/connect-telegram"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <ShieldCheckIcon className="w-5 h-5" />
+                Connect Telegram Now
+                <ArrowRightIcon className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Greeting */}
+      <div 
+        className={`transform transition-all duration-500 ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+      >
+        <p className="text-gray-500 dark:text-gray-400 text-sm">Welcome back,</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white capitalize">
+          {userData.username || 'User'}
+        </h1>
+      </div>
+
+      {/* Credit Balance Card */}
+      <div 
+        className={`transform transition-all duration-500 delay-100 ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+      >
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 p-6 sm:p-8 shadow-xl shadow-primary-500/20">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/20 blur-2xl"></div>
+            <div className="absolute -left-10 -bottom-10 w-60 h-60 rounded-full bg-white/10 blur-3xl"></div>
+            <svg className="absolute right-0 top-0 h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#grid)" />
+            </svg>
+          </div>
+
+          {/* Card Content */}
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-primary-100 text-sm font-medium mb-1 flex items-center gap-2">
+                  <CreditCardIcon className="w-4 h-4" />
+                  Available Credits
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+                    {formatCredits(userData.points)}
+                  </span>
+                  <span className="text-primary-200 text-lg font-medium">credits</span>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm">
+                <SparklesIcon className="w-7 h-7 text-white" />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/buy"
+                className="group flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition-all duration-200 shadow-lg shadow-black/10 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <PlusCircleIcon className="w-5 h-5" />
+                Buy Credits
+                <ArrowRightIcon className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+              </Link>
+              <Link
+                href="/credits"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 backdrop-blur-sm text-white font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <ChartBarIcon className="w-5 h-5" />
+                View History
+              </Link>
+            </div>
+          </div>
+
+          {/* Decorative Elements */}
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-white/40"></div>
+            <div className="w-2 h-2 rounded-full bg-white/60"></div>
+            <div className="w-2 h-2 rounded-full bg-white/80"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div 
+        className={`transform transition-all duration-500 delay-200 ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {quickLinks.map((item, index) => (
-              <Link
-                key={index}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {quickActions.map((action, index) => (
+            <Link
+              key={action.name}
+              href={action.href}
+              className="group relative overflow-hidden p-4 sm:p-5 bg-white dark:bg-gray-800/50 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 hover:-translate-y-1"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className={`inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${action.iconBg} mb-3 transition-transform duration-300 group-hover:scale-110`}>
+                <action.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${action.iconColor}`} />
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-0.5">
+                {action.name}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {action.description}
+              </p>
+              <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Setup & Resources */}
+      <div 
+        className={`transform transition-all duration-500 delay-300 ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Setup & Resources
+          </h2>
+        </div>
+        <div className="space-y-3">
+          {setupItems.map((item, index) => {
+            const ItemWrapper = item.isExternal ? 'a' : Link;
+            const externalProps = item.isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+            
+            return (
+              <ItemWrapper
+                key={item.title}
                 href={item.href}
-                className="group p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+                {...externalProps}
+                className={`group flex items-center gap-4 p-4 bg-white dark:bg-gray-800/50 rounded-xl sm:rounded-2xl border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
+                  item.isComplete === false
+                    ? 'border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/5'
+                    : item.isComplete === true
+                    ? 'border-green-200 dark:border-green-500/30'
+                    : 'border-gray-100 dark:border-gray-700/50'
+                }`}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
-                      {item.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {item.description}
-                    </p>
-                  </div>
-                  <item.icon className={`h-6 w-6 ${item.color}`} />
+                <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
+                  item.isComplete === false
+                    ? 'bg-amber-100 dark:bg-amber-500/20'
+                    : item.isComplete === true
+                    ? 'bg-green-100 dark:bg-green-500/20'
+                    : 'bg-gray-100 dark:bg-gray-700/50'
+                }`}>
+                  <item.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                    item.isComplete === false
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : item.isComplete === true
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`} />
                 </div>
-              </Link>
-            ))}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                    {item.description}
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  {item.isComplete === true ? (
+                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+                  ) : item.isComplete === false ? (
+                    <ExclamationCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+                  ) : (
+                    <ArrowTopRightOnSquareIcon className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                  )}
+                </div>
+              </ItemWrapper>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Pro Tip Card */}
+      <div 
+        className={`transform transition-all duration-500 delay-[400ms] ${
+          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+      >
+        <div className="relative overflow-hidden p-5 sm:p-6 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-xl sm:rounded-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl"></div>
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+              <SparklesIcon className="w-5 h-5 text-primary-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">Pro Tip</h3>
+              <p className="text-sm text-gray-400">
+                Connect your Telegram account to receive instant notifications when someone interacts with your links. Never miss an opportunity!
+              </p>
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );
