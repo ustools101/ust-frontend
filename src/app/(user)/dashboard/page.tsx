@@ -20,7 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const LINK_ROTATION_MODAL_KEY = 'ust_hide_link_rotation_modal';
@@ -33,7 +33,7 @@ interface UserData {
 
 const WELCOME_BONUS_AMOUNT = 2000;
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -552,5 +552,21 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-primary-500/20 rounded-full"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 animate-pulse">Loading your dashboard...</p>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
