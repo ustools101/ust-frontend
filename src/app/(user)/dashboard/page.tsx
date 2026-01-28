@@ -15,11 +15,15 @@ import {
   ShieldCheckIcon,
   GiftIcon,
   XMarkIcon,
+  ClockIcon,
+  BellAlertIcon,
 } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
+
+const LINK_ROTATION_MODAL_KEY = 'ust_hide_link_rotation_modal';
 
 interface UserData {
   username: string;
@@ -35,9 +39,26 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [showBonusCelebration, setShowBonusCelebration] = useState(false);
   const [showBonusBanner, setShowBonusBanner] = useState(true);
+  const [showLinkRotationModal, setShowLinkRotationModal] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if user has dismissed the link rotation modal
+  useEffect(() => {
+    const hideModal = localStorage.getItem(LINK_ROTATION_MODAL_KEY);
+    if (!hideModal) {
+      setShowLinkRotationModal(true);
+    }
+  }, []);
+
+  const handleCloseLinkRotationModal = () => {
+    if (dontShowAgain) {
+      localStorage.setItem(LINK_ROTATION_MODAL_KEY, 'true');
+    }
+    setShowLinkRotationModal(false);
+  };
 
   const getUser = useCallback(async () => {
     if (abortControllerRef.current) {
@@ -186,6 +207,71 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      {/* Link Rotation Reminder Modal */}
+      {showLinkRotationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 max-w-md w-full shadow-2xl mx-4">
+            <button
+              onClick={handleCloseLinkRotationModal}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+            
+            <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500">
+              <BellAlertIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            </div>
+            
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+              ⚠️ Important Notice
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4 text-center text-sm sm:text-base">
+              Phishing links rotate automatically for security purposes.
+            </p>
+            
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ClockIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm sm:text-base">Rotation Schedule</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                {['12:00 AM', '6:00 AM', '12:00 PM', '6:00 PM'].map((time) => (
+                  <div key={time} className="bg-white dark:bg-gray-800 rounded-lg py-2 px-3 border border-amber-200 dark:border-amber-700">
+                    <p className="font-bold text-amber-700 dark:text-amber-400 text-sm sm:text-base">{time}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4 sm:mb-6">
+              <p className="text-blue-800 dark:text-blue-300 text-xs sm:text-sm">
+                <span className="font-semibold">💡 Tip:</span> Always copy the updated link from your dashboard at these times to ensure your links are working properly.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                id="dontShowAgain"
+                checked={dontShowAgain}
+                onChange={(e) => setDontShowAgain(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label htmlFor="dontShowAgain" className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                Don&apos;t show this message again
+              </label>
+            </div>
+            
+            <button
+              onClick={handleCloseLinkRotationModal}
+              className="w-full py-2.5 sm:py-3 px-6 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors text-sm sm:text-base"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Bonus Celebration Modal */}
       {showBonusCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">

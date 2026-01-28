@@ -128,6 +128,7 @@ export default function LinksPage() {
           <option value="voting">Voting</option>
           <option value="giveaway">Giveaway</option>
           <option value="custom">Custom</option>
+          <option value="scratch">Build from Scratch</option>
         </select>
 
         <select
@@ -225,12 +226,13 @@ export default function LinksPage() {
                     <span>Copy</span>
                   </button>
                   <Link
-                    href={`/links/${link._id}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium 
-                             text-white bg-indigo-600 rounded-md
-                             hover:bg-indigo-700
-                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                             transition-colors"
+                    href={link.linkType === 'scratch' ? `/links/${link._id}/scratch` : `/links/${link._id}`}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium 
+                             text-white rounded-md
+                             focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors
+                             ${link.linkType === 'scratch' 
+                               ? 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500' 
+                               : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'}`}
                     aria-label="View link details"
                   >
                     <FaEye className="h-4 w-4" />
