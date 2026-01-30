@@ -78,7 +78,7 @@ const createDefaultPage = (): CustomPage => ({
   buttonText: 'Continue',
   buttonColor: '#3b82f6',
   buttonTextColor: '#ffffff',
-  inputs: [createDefaultInput()],
+  inputs: [],
 });
 
 export default function CustomGeneratePage() {
@@ -174,10 +174,6 @@ export default function CustomGeneratePage() {
 
   const removeInput = (pageIndex: number, inputIndex: number) => {
     const page = formData.pages[pageIndex];
-    if (page.inputs.length <= 1) {
-      toast.error('Each page needs at least one input');
-      return;
-    }
     updatePage(pageIndex, {
       inputs: page.inputs.filter((_, i) => i !== inputIndex),
     });

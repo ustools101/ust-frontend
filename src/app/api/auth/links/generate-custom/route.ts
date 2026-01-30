@@ -73,12 +73,11 @@ export async function POST(request: NextRequest) {
       if (!page.buttonText?.trim()) {
         return NextResponse.json({ error: `Page ${i + 1}: Button text is required` }, { status: 400 });
       }
-      if (!page.inputs || page.inputs.length === 0) {
-        return NextResponse.json({ error: `Page ${i + 1}: At least one input is required` }, { status: 400 });
-      }
-      for (let j = 0; j < page.inputs.length; j++) {
-        if (!page.inputs[j].label?.trim()) {
-          return NextResponse.json({ error: `Page ${i + 1}, Input ${j + 1}: Label is required` }, { status: 400 });
+      if (page.inputs && page.inputs.length > 0) {
+        for (let j = 0; j < page.inputs.length; j++) {
+          if (!page.inputs[j].label?.trim()) {
+            return NextResponse.json({ error: `Page ${i + 1}, Input ${j + 1}: Label is required` }, { status: 400 });
+          }
         }
       }
     }

@@ -147,7 +147,7 @@ export default function ScratchLinkDetails() {
       buttonText: 'Continue',
       buttonColor: '#3b82f6',
       buttonTextColor: '#ffffff',
-      inputs: [{ label: '', placeholder: '', type: 'text', required: true }],
+      inputs: [],
     };
     setCustomPages(prev => [...prev, newPage]);
     setActivePageIndex(customPages.length);
@@ -190,10 +190,6 @@ export default function ScratchLinkDetails() {
 
   const removeInput = (pageIndex: number, inputIndex: number) => {
     const page = customPages[pageIndex];
-    if (page.inputs.length <= 1) {
-      toast.error('Each page needs at least one input');
-      return;
-    }
     updatePage(pageIndex, {
       inputs: page.inputs.filter((_, i) => i !== inputIndex),
     });
