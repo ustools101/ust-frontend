@@ -18,11 +18,14 @@ interface CustomPage {
   id: string;
   title: string;
   subtitle: string;
+  writeup: string;
   logoUrl: string;
   backgroundUrl: string;
   backgroundColor: string;
+  textColor: string;
   buttonText: string;
   buttonColor: string;
+  buttonTextColor: string;
   inputs: PageInput[];
 }
 
