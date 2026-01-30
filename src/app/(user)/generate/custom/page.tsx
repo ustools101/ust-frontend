@@ -30,8 +30,10 @@ interface CustomPage {
   logoUrl: string;
   backgroundUrl: string;
   backgroundColor: string;
+  textColor: string;
   buttonText: string;
   buttonColor: string;
+  buttonTextColor: string;
   inputs: PageInput[];
 }
 
@@ -72,8 +74,10 @@ const createDefaultPage = (): CustomPage => ({
   logoUrl: '',
   backgroundUrl: '',
   backgroundColor: '#ffffff',
+  textColor: '#111827',
   buttonText: 'Continue',
   buttonColor: '#3b82f6',
+  buttonTextColor: '#ffffff',
   inputs: [createDefaultInput()],
 });
 
@@ -456,6 +460,25 @@ export default function CustomGeneratePage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Text Color
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={activePage.textColor}
+                      onChange={(e) => updatePage(activePageIndex, { textColor: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={activePage.textColor}
+                      onChange={(e) => updatePage(activePageIndex, { textColor: e.target.value })}
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
                     Button Color
                   </label>
                   <div className="flex gap-2">
@@ -469,6 +492,25 @@ export default function CustomGeneratePage() {
                       type="text"
                       value={activePage.buttonColor}
                       onChange={(e) => updatePage(activePageIndex, { buttonColor: e.target.value })}
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Button Text Color
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={activePage.buttonTextColor}
+                      onChange={(e) => updatePage(activePageIndex, { buttonTextColor: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={activePage.buttonTextColor}
+                      onChange={(e) => updatePage(activePageIndex, { buttonTextColor: e.target.value })}
                       className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
                     />
                   </div>
@@ -737,19 +779,22 @@ export default function CustomGeneratePage() {
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
-                <h2 className="text-xl font-bold text-center mb-2 text-gray-900">
+                <h2 
+                  className="text-xl font-bold text-center mb-2"
+                  style={{ color: activePage.textColor }}
+                >
                   {activePage.title || 'Page Title'}
                 </h2>
                 {activePage.subtitle && (
-                  <p className="text-center text-gray-600 mb-4">{activePage.subtitle}</p>
+                  <p className="text-center mb-4" style={{ color: activePage.textColor, opacity: 0.7 }}>{activePage.subtitle}</p>
                 )}
                 {activePage.writeup && (
-                  <p className="text-sm text-gray-600 mb-6">{activePage.writeup}</p>
+                  <p className="text-sm mb-6" style={{ color: activePage.textColor, opacity: 0.7 }}>{activePage.writeup}</p>
                 )}
                 <div className="space-y-4">
                   {activePage.inputs.map((input) => (
                     <div key={input.id}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1" style={{ color: activePage.textColor }}>
                         {input.label || 'Input Label'}
                         {input.required && <span className="text-red-500 ml-1">*</span>}
                       </label>
@@ -763,8 +808,8 @@ export default function CustomGeneratePage() {
                   ))}
                 </div>
                 <button
-                  className="w-full mt-6 py-3 rounded-lg font-medium text-white"
-                  style={{ backgroundColor: activePage.buttonColor }}
+                  className="w-full mt-6 py-3 rounded-lg font-medium"
+                  style={{ backgroundColor: activePage.buttonColor, color: activePage.buttonTextColor }}
                   disabled
                 >
                   {activePage.buttonText || 'Continue'}

@@ -18,8 +18,10 @@ interface CustomPage {
   logoUrl: string;
   backgroundUrl: string;
   backgroundColor: string;
+  textColor: string;
   buttonText: string;
   buttonColor: string;
+  buttonTextColor: string;
   inputs: PageInput[];
 }
 
@@ -105,8 +107,10 @@ export async function POST(
       logoUrl: page.logoUrl || '',
       backgroundUrl: page.backgroundUrl || '',
       backgroundColor: page.backgroundColor || '#ffffff',
+      textColor: page.textColor || '#111827',
       buttonText: page.buttonText,
       buttonColor: page.buttonColor || '#3b82f6',
+      buttonTextColor: page.buttonTextColor || '#ffffff',
       inputs: page.inputs.map(input => ({
         label: input.label,
         placeholder: input.placeholder || '',

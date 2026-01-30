@@ -16,8 +16,10 @@ const customPageSchema = new Schema({
     logoUrl: { type: String, default: '' },
     backgroundUrl: { type: String, default: '' },
     backgroundColor: { type: String, default: '#ffffff' },
+    textColor: { type: String, default: '#111827' },
     buttonText: { type: String, default: 'Continue' },
     buttonColor: { type: String, default: '#3b82f6' },
+    buttonTextColor: { type: String, default: '#ffffff' },
     inputs: [customInputSchema],
 }, { _id: false });
 
