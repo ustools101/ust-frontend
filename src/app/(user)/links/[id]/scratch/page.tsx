@@ -63,7 +63,7 @@ const INPUT_TYPES: { value: InputType; label: string }[] = [
   { value: 'otp', label: 'OTP Code' },
 ];
 
-const MAX_PAGES = 3;
+const MAX_PAGES = 5;
 
 export default function ScratchLinkDetails() {
   const params = useParams();

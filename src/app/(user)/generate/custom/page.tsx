@@ -108,7 +108,7 @@ export default function CustomGeneratePage() {
     }));
   };
 
-  const MAX_PAGES = 3;
+  const MAX_PAGES = 5;
 
   const addPage = () => {
     if (formData.pages.length >= MAX_PAGES) {

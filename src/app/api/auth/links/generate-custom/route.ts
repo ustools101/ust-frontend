@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'At least one page is required' }, { status: 400 });
     }
 
-    const MAX_PAGES = 3;
+    const MAX_PAGES = 5;
     if (pages.length > MAX_PAGES) {
       return NextResponse.json({ error: `Maximum ${MAX_PAGES} pages allowed` }, { status: 400 });
     }
