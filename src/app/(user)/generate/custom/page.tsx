@@ -194,9 +194,11 @@ export default function CustomGeneratePage() {
 
   const calculatePrice = () => {
     const basePrice = 4000;
+    const includedPages = 5;
     const pagePrice = 1500;
     const effectiveBasePrice = formData.duration === 0.5 ? basePrice / 2 : basePrice;
-    const totalPagePrice = (formData.pages.length - 1) * pagePrice;
+    const extraPages = Math.max(0, formData.pages.length - includedPages);
+    const totalPagePrice = extraPages * pagePrice;
     
     const durationMultipliers: Record<number, number> = {
       0.5: 1,

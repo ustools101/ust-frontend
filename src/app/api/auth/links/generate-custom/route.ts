@@ -83,11 +83,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate price
+    // Calculate price - base price includes up to 5 pages
     const basePrice = 4000;
+    const includedPages = 5;
     const pagePrice = 1500;
     const effectiveBasePrice = duration === 0.5 ? basePrice / 2 : basePrice;
-    const totalPagePrice = (pages.length - 1) * pagePrice;
+    const extraPages = Math.max(0, pages.length - includedPages);
+    const totalPagePrice = extraPages * pagePrice;
     
     const durationMultipliers: Record<number, number> = {
       0.5: 1,
