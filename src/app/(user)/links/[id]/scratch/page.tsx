@@ -679,8 +679,7 @@ export default function ScratchLinkDetails() {
                         <button
                           type="button"
                           onClick={() => removeInput(activePageIndex, inputIndex)}
-                          disabled={activePage.inputs.length <= 1}
-                          className="p-1 text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-1 text-red-400 hover:text-red-300"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
