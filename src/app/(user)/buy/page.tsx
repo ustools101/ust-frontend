@@ -6,6 +6,7 @@ import {
   BanknotesIcon,
   CurrencyDollarIcon,
   XMarkIcon,
+  CheckIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
