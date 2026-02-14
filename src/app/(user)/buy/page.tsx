@@ -1,17 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  ShieldCheckIcon, 
+import {
+  ShieldCheckIcon,
   BanknotesIcon,
   CurrencyDollarIcon,
-  ClipboardDocumentIcon,
   XMarkIcon,
-  CheckIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import { QRCodeSVG } from 'qrcode.react';
 
 type PaymentMethod = 'bank' | 'usdt';
 
@@ -24,28 +21,17 @@ interface PaymentModalProps {
 }
 
 const PaymentModal = ({ isOpen, onClose, amount, paymentMethod, usdtRate }: PaymentModalProps) => {
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const bankName = process.env.NEXT_PUBLIC_BANK_NAME || 'Kuda Bank';
-  const accountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || '3001323169';
-  const accountName = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || 'Godwin Idemudia';
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+2348000000000';
-  const walletAddress = process.env.NEXT_PUBLIC_USDT_WALLET_ADDRESS || '';
-
   const usdtAmount = usdtRate ? (amount / usdtRate).toFixed(2) : '...';
 
-  const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(label);
-      toast.success(`${label} copied!`);
-      setTimeout(() => setCopied(null), 2000);
-    } catch {
-      toast.error('Failed to copy');
-    }
-  };
-
   if (!isOpen) return null;
+
+  const getWhatsAppMessage = () => {
+    if (paymentMethod === 'bank') {
+      return `Hi, I want to buy ₦${amount.toLocaleString()} credits. Please provide payment details.`;
+    }
+    return `Hi, I want to buy $${usdtAmount} USDT worth of credits (₦${amount.toLocaleString()}). Please provide payment details.`;
+  };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
@@ -71,63 +57,38 @@ const PaymentModal = ({ isOpen, onClose, amount, paymentMethod, usdtRate }: Paym
               <p className="text-xs text-green-400 mt-1">= {amount.toLocaleString()} Credits</p>
             </div>
 
-            {/* Bank Details */}
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Bank Name</p>
-                  <p className="text-white font-medium">{bankName}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Account Number</p>
-                  <p className="text-white font-medium font-mono">{accountNumber}</p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(accountNumber, 'Account number')}
-                  className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
-                >
-                  {copied === 'Account number' ? (
-                    <CheckIcon className="w-4 h-4 text-green-400" />
-                  ) : (
-                    <ClipboardDocumentIcon className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Account Name</p>
-                  <p className="text-white font-medium">{accountName}</p>
-                </div>
-              </div>
+            {/* Instruction Message */}
+            <div className="bg-gray-800/50 rounded-lg p-6 text-center border border-gray-700">
+              <p className="text-gray-300 mb-2">
+                To complete your purchase via Bank Transfer, please contact us on WhatsApp to get the current account details.
+              </p>
             </div>
 
-            {/* Instructions */}
+            {/* Steps */}
             <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-4">
               <div className="flex items-start gap-2 mb-3">
                 <InformationCircleIcon className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-blue-400">Payment Instructions</p>
+                <p className="text-sm font-medium text-blue-400">How to Pay</p>
               </div>
               <ol className="list-decimal ml-6 space-y-2 text-sm text-gray-300">
-                <li>Transfer <span className="text-white font-semibold">₦{amount.toLocaleString()}</span> to the bank account above</li>
-                <li>Take a <span className="text-white">screenshot</span> of your payment receipt/confirmation</li>
-                <li>Send the receipt with your <span className="text-white">registered email address</span> to WhatsApp</li>
-                <li>Your credits will be added within <span className="text-green-400 font-semibold">30 minutes - 2 hours</span></li>
+                <li>Click the button below to message us on WhatsApp</li>
+                <li>Request payment details for <span className="text-white font-semibold">₦{amount.toLocaleString()}</span></li>
+                <li>Make the transfer and send the receipt</li>
+                <li>Your credits will be added upon confirmation</li>
               </ol>
             </div>
 
             {/* WhatsApp Button */}
             <a
-              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi,%20I%20just%20made%20a%20payment%20of%20₦${amount.toLocaleString()}%20for%20credits.%20My%20email%20is:%20`}
+              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(getWhatsAppMessage())}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
-              Send Receipt on WhatsApp
+              Chat on WhatsApp
             </a>
           </div>
         ) : (
@@ -146,68 +107,38 @@ const PaymentModal = ({ isOpen, onClose, amount, paymentMethod, usdtRate }: Paym
               )}
             </div>
 
-            {/* QR Code */}
-            <div className="flex flex-col items-center bg-white rounded-lg p-4">
-              <QRCodeSVG 
-                value={walletAddress} 
-                size={180}
-                level="H"
-                includeMargin
-              />
-              <p className="text-xs text-gray-600 mt-2">Scan to get wallet address</p>
+            {/* Instruction Message */}
+            <div className="bg-gray-800/50 rounded-lg p-6 text-center border border-gray-700">
+              <p className="text-gray-300 mb-2">
+                To complete your purchase via USDT, please contact us on WhatsApp to get the wallet address.
+              </p>
             </div>
 
-            {/* Wallet Address */}
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-1">USDT Wallet Address (ERC-20 / Ethereum)</p>
-                  <p className="text-white font-mono text-xs sm:text-sm break-all">{walletAddress}</p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(walletAddress, 'Wallet address')}
-                  className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition flex-shrink-0"
-                >
-                  {copied === 'Wallet address' ? (
-                    <CheckIcon className="w-4 h-4 text-green-400" />
-                  ) : (
-                    <ClipboardDocumentIcon className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Warning */}
-            <div className="bg-yellow-900/20 border border-yellow-800/50 rounded-lg p-3">
-              <p className="text-xs text-yellow-400 font-medium">⚠️ Important: Only send USDT on the Ethereum (ERC-20) network. Sending other tokens or using wrong network will result in permanent loss.</p>
-            </div>
-
-            {/* Instructions */}
+            {/* Steps */}
             <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-4">
               <div className="flex items-start gap-2 mb-3">
                 <InformationCircleIcon className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-blue-400">Payment Instructions</p>
+                <p className="text-sm font-medium text-blue-400">How to Pay</p>
               </div>
               <ol className="list-decimal ml-6 space-y-2 text-sm text-gray-300">
-                <li>Send exactly <span className="text-white font-semibold">${usdtAmount} USDT</span> to the wallet address above</li>
-                <li>Use <span className="text-white">Ethereum (ERC-20)</span> network only</li>
-                <li>Take a <span className="text-white">screenshot</span> of the transaction confirmation</li>
-                <li>Send the screenshot with your <span className="text-white">registered email</span> to WhatsApp</li>
-                <li>Credits will be added after <span className="text-green-400 font-semibold">blockchain confirmation (10-30 mins)</span></li>
+                <li>Click the button below to message us on WhatsApp</li>
+                <li>Request wallet address for <span className="text-white font-semibold">${usdtAmount} USDT</span></li>
+                <li>Send the crypto and share the transaction hash/screenshot</li>
+                <li>Your credits will be added after blockchain confirmation</li>
               </ol>
             </div>
 
             {/* WhatsApp Button */}
             <a
-              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=Hi,%20I%20just%20sent%20$${usdtAmount}%20USDT%20for%20credits.%20My%20email%20is:%20`}
+              href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(getWhatsAppMessage())}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
-              Send Receipt on WhatsApp
+              Chat on WhatsApp
             </a>
           </div>
         )}
@@ -292,7 +223,7 @@ export default function BuyCreditsPage() {
           </span>
         </div>
       )}
-      
+
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Amount Input */}
@@ -323,11 +254,10 @@ export default function BuyCreditsPage() {
                 key={value}
                 type="button"
                 onClick={() => setAmount(value)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                  amount === value
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${amount === value
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  }`}
               >
                 ₦{value.toLocaleString()}
               </button>
@@ -344,11 +274,10 @@ export default function BuyCreditsPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod('bank')}
-                className={`relative p-4 rounded-xl border-2 transition-all ${
-                  paymentMethod === 'bank'
-                    ? 'border-green-500 bg-green-900/20'
-                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
-                }`}
+                className={`relative p-4 rounded-xl border-2 transition-all ${paymentMethod === 'bank'
+                  ? 'border-green-500 bg-green-900/20'
+                  : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  }`}
               >
                 {paymentMethod === 'bank' && (
                   <div className="absolute top-2 right-2">
@@ -373,11 +302,10 @@ export default function BuyCreditsPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod('usdt')}
-                className={`relative p-4 rounded-xl border-2 transition-all ${
-                  paymentMethod === 'usdt'
-                    ? 'border-purple-500 bg-purple-900/20'
-                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
-                }`}
+                className={`relative p-4 rounded-xl border-2 transition-all ${paymentMethod === 'usdt'
+                  ? 'border-purple-500 bg-purple-900/20'
+                  : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  }`}
               >
                 {paymentMethod === 'usdt' && (
                   <div className="absolute top-2 right-2">
@@ -415,13 +343,12 @@ export default function BuyCreditsPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${
-              paymentMethod === 'bank'
-                ? 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'
-                : 'bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500'
-            }`}
+            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${paymentMethod === 'bank'
+              ? 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'
+              : 'bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500'
+              }`}
           >
-            {paymentMethod === 'bank' 
+            {paymentMethod === 'bank'
               ? `Pay ₦${amount.toLocaleString()}`
               : `Pay $${usdtAmount} USDT`
             }
