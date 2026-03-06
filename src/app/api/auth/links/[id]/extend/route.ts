@@ -11,10 +11,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try{
+  try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    const {duration} = await request.json();
+    const { duration } = await request.json();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,46 +23,57 @@ export async function POST(
       return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
     }
 
-    if(!duration || isNaN(duration)){
-      return NextResponse.json({error: 'Duration is required' }, { status: 400 });
+    if (!duration || isNaN(duration)) {
+      return NextResponse.json({ error: 'Duration is required' }, { status: 400 });
     }
 
     await connectToDatabase();
 
     const link = await Link.findById(id);
 
-    if(!link){
-      return NextResponse.json({error: 'Link not found' }, { status: 404 });
+    if (!link) {
+      return NextResponse.json({ error: 'Link not found' }, { status: 404 });
     }
 
     const user = await User.findById(session.user.id);
 
-    if(!user){
-      return NextResponse.json({error: 'User not found' }, { status: 404 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const platformPrice = [4000, 6500, 9000];
 
-    const price = duration * platformPrice[link.socialMedia.length-1];
+    let price = 0;
 
-    if(user.points < price){
-      return NextResponse.json({error: 'Insufficient points' }, { status: 400 });
+    // Calculate price based on link type
+    if (link.linkType === 'scratch') {
+      // 4000 per week for scratch links
+      price = duration * 4000;
+    } else if (link.socialMedia && Array.isArray(link.socialMedia) && link.socialMedia.length > 0) {
+      const platformPrice = [4000, 6500, 9000];
+      const platformIndex = Math.min(link.socialMedia.length - 1, 2); // Cap at max array index
+      price = duration * platformPrice[platformIndex];
+    } else {
+      price = duration * 4000; // Fallback base price
+    }
+
+    if (user.points < price) {
+      return NextResponse.json({ error: 'Insufficient points' }, { status: 400 });
     }
 
     // check if link has expired
     let newExpiresAt;
-    if(link.expiresAt < Date.now()){
+    if (link.expiresAt < Date.now()) {
       const dateNow = new Date();
       newExpiresAt = new Date(dateNow.getTime() + duration * 7 * 24 * 60 * 60 * 1000);
-    }else{
+    } else {
       const expiresAt = new Date(link.expiresAt);
-      newExpiresAt= new Date(expiresAt.getTime() + duration * 7 * 24 * 60 * 60 * 1000);
+      newExpiresAt = new Date(expiresAt.getTime() + duration * 7 * 24 * 60 * 60 * 1000);
     }
-    await Link.findByIdAndUpdate(id, {expiresAt: newExpiresAt});
+    await Link.findByIdAndUpdate(id, { expiresAt: newExpiresAt });
     user.points -= price;
     await user.save();
     return NextResponse.json({ message: "Link extended successfully" }, { status: 200 });
-  }catch(error:any){
+  } catch (error: any) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
