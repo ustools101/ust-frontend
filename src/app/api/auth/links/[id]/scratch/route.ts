@@ -54,6 +54,9 @@ export async function POST(
     const data: UpdateData = await request.json();
     const { linkName, customPages, successPage } = data;
 
+    console.log("=== SCRATCH PATCH INCOMING PAYLOAD ===");
+    console.log("Incoming customPages[0]:", JSON.stringify(customPages[0], null, 2));
+
     // Validate required fields
     if (!linkName?.trim()) {
       return NextResponse.json({ error: 'Link name is required' }, { status: 400 });
@@ -129,6 +132,9 @@ export async function POST(
     };
 
     await link.save();
+
+    console.log("=== SCRATCH PATCH DB SAVED STATE ===");
+    console.log("Saved customPages[0]:", JSON.stringify(link.customPages[0], null, 2));
 
     return NextResponse.json({
       success: 'Link updated successfully',
