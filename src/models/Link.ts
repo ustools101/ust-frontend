@@ -1,4 +1,4 @@
-import {models, model, Schema} from 'mongoose'
+import { models, model, Schema } from 'mongoose'
 import { ILink } from '@/types'
 
 const customInputSchema = new Schema({
@@ -20,6 +20,8 @@ const customPageSchema = new Schema({
     buttonText: { type: String, default: 'Continue' },
     buttonColor: { type: String, default: '#3b82f6' },
     buttonTextColor: { type: String, default: '#ffffff' },
+    inputBackgroundColor: { type: String, default: 'transparent' },
+    inputTextColor: { type: String, default: '#000000' },
     inputs: [customInputSchema],
 }, { _id: false });
 
@@ -64,17 +66,17 @@ const linkSchema = new Schema<ILink>({
     image: {
         type: String,
     },
-    bannerImage:{
+    bannerImage: {
         type: String,
     },
     socialMedia: {
         type: Schema.Types.Mixed,
     },
-    otpEnabled:{
+    otpEnabled: {
         type: Boolean,
         default: false,
     },
-    retry:{
+    retry: {
         type: Number,
         default: 0,
     },

@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { FaCopy } from 'react-icons/fa';
-import { 
-  PlusIcon, 
-  TrashIcon, 
-  ChevronUpIcon, 
+import {
+  PlusIcon,
+  TrashIcon,
+  ChevronUpIcon,
   ChevronDownIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
@@ -34,6 +34,8 @@ interface CustomPage {
   buttonText: string;
   buttonColor: string;
   buttonTextColor: string;
+  inputBackgroundColor: string;
+  inputTextColor: string;
   inputs: PageInput[];
 }
 
@@ -125,7 +127,7 @@ export default function ScratchLinkDetails() {
   const activePage = customPages[activePageIndex];
 
   const updatePage = (pageIndex: number, updates: Partial<CustomPage>) => {
-    setCustomPages(prev => prev.map((page, i) => 
+    setCustomPages(prev => prev.map((page, i) =>
       i === pageIndex ? { ...page, ...updates } : page
     ));
   };
@@ -147,6 +149,8 @@ export default function ScratchLinkDetails() {
       buttonText: 'Continue',
       buttonColor: '#3b82f6',
       buttonTextColor: '#ffffff',
+      inputBackgroundColor: 'transparent',
+      inputTextColor: '#000000',
       inputs: [],
     };
     setCustomPages(prev => [...prev, newPage]);
@@ -171,7 +175,7 @@ export default function ScratchLinkDetails() {
   const movePage = (pageIndex: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? pageIndex - 1 : pageIndex + 1;
     if (newIndex < 0 || newIndex >= customPages.length) return;
-    
+
     setCustomPages(prev => {
       const newPages = [...prev];
       [newPages[pageIndex], newPages[newIndex]] = [newPages[newIndex], newPages[pageIndex]];
@@ -198,7 +202,7 @@ export default function ScratchLinkDetails() {
   const updateInput = (pageIndex: number, inputIndex: number, updates: Partial<PageInput>) => {
     const page = customPages[pageIndex];
     updatePage(pageIndex, {
-      inputs: page.inputs.map((input, i) => 
+      inputs: page.inputs.map((input, i) =>
         i === inputIndex ? { ...input, ...updates } : input
       ),
     });
@@ -344,7 +348,7 @@ export default function ScratchLinkDetails() {
         <p className="text-sm text-gray-400 mb-4">
           Current expiry: <span className="text-purple-400">{format(new Date(link.expiresAt), 'PPP')}</span>
         </p>
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-400 mb-2">
             Extend by:
@@ -458,11 +462,10 @@ export default function ScratchLinkDetails() {
                 key={index}
                 type="button"
                 onClick={() => setActivePageIndex(index)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  activePageIndex === index
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activePageIndex === index
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 Page {index + 1}
               </button>
@@ -637,6 +640,51 @@ export default function ScratchLinkDetails() {
                       type="text"
                       value={activePage.buttonTextColor || '#ffffff'}
                       onChange={(e) => updatePage(activePageIndex, { buttonTextColor: e.target.value })}
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Input Background Color
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative w-12 h-10 rounded overflow-hidden border border-gray-700 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjY2NjIiAvPgo8cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjY2NjIiAvPgo8cmVjdCB4PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiAvPgo8cmVjdCB5PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiAvPgo8L3N2Zz4=')]">
+                      <input
+                        type="color"
+                        value={activePage.inputBackgroundColor === 'transparent' ? '#ffffff' : (activePage.inputBackgroundColor || '#ffffff')}
+                        onChange={(e) => updatePage(activePageIndex, { inputBackgroundColor: e.target.value })}
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                      />
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundColor: activePage.inputBackgroundColor === 'transparent' ? 'transparent' : (activePage.inputBackgroundColor || 'transparent') }}>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      value={activePage.inputBackgroundColor || 'transparent'}
+                      onChange={(e) => updatePage(activePageIndex, { inputBackgroundColor: e.target.value })}
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
+                      placeholder="transparent or #hex"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Input Text Color
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={activePage.inputTextColor || '#000000'}
+                      onChange={(e) => updatePage(activePageIndex, { inputTextColor: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={activePage.inputTextColor || '#000000'}
+                      onChange={(e) => updatePage(activePageIndex, { inputTextColor: e.target.value })}
                       className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
                     />
                   </div>
@@ -839,12 +887,12 @@ export default function ScratchLinkDetails() {
             >
               Close Preview
             </button>
-            <div 
+            <div
               className="relative rounded-lg overflow-hidden shadow-2xl"
               style={{ backgroundColor: activePage.backgroundColor }}
             >
               {activePage.backgroundUrl && (
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center opacity-20"
                   style={{ backgroundImage: `url(${activePage.backgroundUrl})` }}
                 />
@@ -852,14 +900,14 @@ export default function ScratchLinkDetails() {
               <div className="relative p-8">
                 {activePage.logoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img 
-                    src={activePage.logoUrl} 
-                    alt="Logo" 
+                  <img
+                    src={activePage.logoUrl}
+                    alt="Logo"
                     className="h-12 mx-auto mb-6 object-contain"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
-                <h2 
+                <h2
                   className="text-xl font-bold text-center mb-2"
                   style={{ color: activePage.textColor || '#111827' }}
                 >
