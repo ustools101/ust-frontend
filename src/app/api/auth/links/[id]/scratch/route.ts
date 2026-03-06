@@ -22,6 +22,8 @@ interface CustomPage {
   buttonText: string;
   buttonColor: string;
   buttonTextColor: string;
+  inputBackgroundColor: string;
+  inputTextColor: string;
   inputs: PageInput[];
 }
 
@@ -110,6 +112,8 @@ export async function POST(
       buttonText: page.buttonText,
       buttonColor: page.buttonColor || '#3b82f6',
       buttonTextColor: page.buttonTextColor || '#ffffff',
+      inputBackgroundColor: page.inputBackgroundColor || 'transparent',
+      inputTextColor: page.inputTextColor || '#000000',
       inputs: page.inputs.map(input => ({
         label: input.label,
         placeholder: input.placeholder || '',
@@ -126,7 +130,7 @@ export async function POST(
 
     await link.save();
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: 'Link updated successfully',
       link,
     }, { status: 200 });

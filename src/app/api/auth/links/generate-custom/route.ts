@@ -26,6 +26,8 @@ interface CustomPage {
   buttonText: string;
   buttonColor: string;
   buttonTextColor: string;
+  inputBackgroundColor: string;
+  inputTextColor: string;
   inputs: PageInput[];
 }
 
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
     const effectiveBasePrice = duration === 0.5 ? basePrice / 2 : basePrice;
     const extraPages = Math.max(0, pages.length - includedPages);
     const totalPagePrice = extraPages * pagePrice;
-    
+
     const durationMultipliers: Record<number, number> = {
       0.5: 1,
       1: 1,
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
       8: 7,
       12: 10,
     };
-    
+
     const multiplier = durationMultipliers[duration] || 1;
     const price = (effectiveBasePrice + totalPagePrice) * multiplier;
 
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
     // Connect to DB and check user
     await connectDB();
     const user = await User.findOne({ email: session.user.email });
-    
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 400 });
     }
@@ -148,6 +150,8 @@ export async function POST(request: NextRequest) {
         buttonText: page.buttonText,
         buttonColor: page.buttonColor || '#3b82f6',
         buttonTextColor: page.buttonTextColor || '#ffffff',
+        inputBackgroundColor: page.inputBackgroundColor || 'transparent',
+        inputTextColor: page.inputTextColor || '#000000',
         inputs: page.inputs.map(input => ({
           label: input.label,
           placeholder: input.placeholder || '',
@@ -169,8 +173,8 @@ export async function POST(request: NextRequest) {
     user.points -= price;
     await user.save();
 
-    return NextResponse.json({ 
-      success: 'Custom link created successfully', 
+    return NextResponse.json({
+      success: 'Custom link created successfully',
       link: newLink,
       linkId: linkId,
     }, { status: 200 });
