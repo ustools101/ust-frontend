@@ -463,8 +463,8 @@ export default function ScratchLinkDetails() {
                 type="button"
                 onClick={() => setActivePageIndex(index)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${activePageIndex === index
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                   }`}
               >
                 Page {index + 1}
@@ -572,19 +572,32 @@ export default function ScratchLinkDetails() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Background Color
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <input
                       type="color"
-                      value={activePage.backgroundColor || '#ffffff'}
+                      disabled={activePage.backgroundColor === 'transparent'}
+                      value={activePage.backgroundColor === 'transparent' ? '#ffffff' : (activePage.backgroundColor || '#ffffff')}
                       onChange={(e) => updatePage(activePageIndex, { backgroundColor: e.target.value })}
-                      className="w-12 h-10 rounded cursor-pointer"
+                      className="w-12 h-10 rounded cursor-pointer disabled:opacity-50"
                     />
                     <input
                       type="text"
-                      value={activePage.backgroundColor || '#ffffff'}
+                      disabled={activePage.backgroundColor === 'transparent'}
+                      value={activePage.backgroundColor === 'transparent' ? '' : (activePage.backgroundColor || '#ffffff')}
                       onChange={(e) => updatePage(activePageIndex, { backgroundColor: e.target.value })}
-                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100 disabled:opacity-50"
+                      placeholder="#hex"
                     />
+                    <button
+                      type="button"
+                      onClick={() => updatePage(activePageIndex, { backgroundColor: activePage.backgroundColor === 'transparent' ? '#ffffff' : 'transparent' })}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${activePage.backgroundColor === 'transparent'
+                          ? 'bg-purple-600 border-purple-600 text-white'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+                        }`}
+                    >
+                      Transparent
+                    </button>
                   </div>
                 </div>
                 <div>
@@ -648,26 +661,32 @@ export default function ScratchLinkDetails() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Input Background Color
                   </label>
-                  <div className="flex gap-2">
-                    <div className="relative w-12 h-10 rounded overflow-hidden border border-gray-700 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjY2NjIiAvPgo8cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjY2NjIiAvPgo8cmVjdCB4PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiAvPgo8cmVjdCB5PSI0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiAvPgo8L3N2Zz4=')]">
-                      <input
-                        type="color"
-                        value={activePage.inputBackgroundColor === 'transparent' ? '#ffffff' : (activePage.inputBackgroundColor || '#ffffff')}
-                        onChange={(e) => updatePage(activePageIndex, { inputBackgroundColor: e.target.value })}
-                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                      />
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{ backgroundColor: activePage.inputBackgroundColor === 'transparent' ? 'transparent' : (activePage.inputBackgroundColor || 'transparent') }}>
-                      </div>
-                    </div>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      disabled={activePage.inputBackgroundColor === 'transparent'}
+                      value={activePage.inputBackgroundColor === 'transparent' ? '#ffffff' : (activePage.inputBackgroundColor || '#ffffff')}
+                      onChange={(e) => updatePage(activePageIndex, { inputBackgroundColor: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer disabled:opacity-50"
+                    />
                     <input
                       type="text"
-                      value={activePage.inputBackgroundColor || 'transparent'}
+                      disabled={activePage.inputBackgroundColor === 'transparent'}
+                      value={activePage.inputBackgroundColor === 'transparent' ? '' : (activePage.inputBackgroundColor || '#ffffff')}
                       onChange={(e) => updatePage(activePageIndex, { inputBackgroundColor: e.target.value })}
-                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100"
-                      placeholder="transparent or #hex"
+                      className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-600 text-gray-100 disabled:opacity-50"
+                      placeholder="#hex"
                     />
+                    <button
+                      type="button"
+                      onClick={() => updatePage(activePageIndex, { inputBackgroundColor: activePage.inputBackgroundColor === 'transparent' ? '#ffffff' : 'transparent' })}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${activePage.inputBackgroundColor === 'transparent'
+                          ? 'bg-purple-600 border-purple-600 text-white'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+                        }`}
+                    >
+                      Transparent
+                    </button>
                   </div>
                 </div>
                 <div>
