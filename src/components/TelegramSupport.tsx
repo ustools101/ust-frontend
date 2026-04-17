@@ -8,7 +8,7 @@ export default function TelegramSupport() {
       href="https://api.whatsapp.com/send/?phone=2349014652063&type=phone_number&app_absent=0"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-32 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
+      className="fixed bottom-20 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
       aria-label="Contact Support on Telegram"
     >
       {/* whatsapp svg icon */}
