@@ -4,246 +4,258 @@ import { useEffect, useState } from 'react';
 import { getSession } from 'next-auth/react';
 import ILink from '@/types/link';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import Link from 'next/link';
-import { FaEdit, FaTrash, FaEye, FaCopy } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import {
+  ClipboardDocumentIcon,
+  EyeIcon,
+  PlusIcon,
+  ArrowsUpDownIcon,
+  LinkIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
-const isValidImageUrl = (url: string | undefined): boolean => {
-  if (!url) return false;
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-  } catch {
-    return false;
-  }
+/* ─── helpers ────────────────────────────────────────────────── */
+
+const FILTER_TABS = [
+  { value: 'all',      label: 'All' },
+  { value: 'voting',   label: 'Voting' },
+  { value: 'giveaway', label: 'Giveaway' },
+  { value: 'custom',   label: 'Custom' },
+  { value: 'scratch',  label: 'Scratch' },
+];
+
+const TYPE_COLORS: Record<string, string> = {
+  voting:   'bg-blue-500',
+  giveaway: 'bg-green-500',
+  custom:   'bg-purple-500',
+  scratch:  'bg-pink-500',
 };
 
-const DEFAULT_LINK_IMAGE = '/placeholder-link.png';
+const TYPE_TEXT: Record<string, string> = {
+  voting:   'text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-500/10',
+  giveaway: 'text-green-700 bg-green-50 dark:text-green-300 dark:bg-green-500/10',
+  custom:   'text-purple-700 bg-purple-50 dark:text-purple-300 dark:bg-purple-500/10',
+  scratch:  'text-pink-700 bg-pink-50 dark:text-pink-300 dark:bg-pink-500/10',
+};
+
+/* ─── component ───────────────────────────────────────────────── */
 
 export default function LinksPage() {
-  const [links, setLinks] = useState<ILink[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [links, setLinks]       = useState<ILink[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [filter, setFilter]     = useState('all');
+  const [sortDesc, setSortDesc] = useState(true);
+  const [copied, setCopied]     = useState<string | null>(null);
 
-  const socialLinkHostAddress = process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST;
+  const host = process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST?.trim() ?? '';
 
-  useEffect(() => {
-    fetchLinks();
-  }, []);
+  useEffect(() => { fetchLinks(); }, []);
 
   const fetchLinks = async () => {
     try {
       const session = await getSession();
-      if (!session) {
-        toast.error('Please sign in to view your links');
-        return;
-      }
-
-      const response = await fetch('/api/auth/links');
-      const data = await response.json();
-
-      if (data.error) {
-        toast.error(data.error);
-        return;
-      }
-
+      if (!session) { toast.error('Please sign in'); return; }
+      const res  = await fetch('/api/auth/links');
+      const data = await res.json();
+      if (data.error) { toast.error(data.error); return; }
       setLinks(data.links);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch links');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopyLink = async (link: string) => {
+  const handleCopy = async (linkId: string) => {
+    const url = `${host}/slink/${linkId}`;
     try {
-      if (typeof window !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(link);
-        toast.success('Link copied to clipboard!');
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
       } else {
-        // Fallback for environments where clipboard API is not available
-        const textArea = document.createElement('textarea');
-        textArea.value = link;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          toast.success('Link copied to clipboard!');
-        } catch (err) {
-          toast.error('Failed to copy link');
-        }
-        document.body.removeChild(textArea);
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
       }
-    } catch (err) {
-      console.error('Copy error:', err);
-      toast.error('Failed to copy link');
+      setCopied(linkId);
+      toast.success('Link copied!');
+      setTimeout(() => setCopied(null), 2000);
+    } catch {
+      toast.error('Failed to copy');
     }
   };
 
-  const filteredLinks = links.filter(link => {
-    if (filter === 'all') return true;
-    return link.linkType.toLowerCase() === filter.toLowerCase();
-  });
+  const displayed = [...links]
+    .filter(l => filter === 'all' || l.linkType?.toLowerCase() === filter)
+    .sort((a, b) => {
+      const av = new Date(a.createdAt ?? 0).getTime();
+      const bv = new Date(b.createdAt ?? 0).getTime();
+      return sortDesc ? bv - av : av - bv;
+    });
 
-  const sortedLinks = [...filteredLinks].sort((a, b) => {
-    const aValue = a[sortBy as keyof ILink] ?? '';
-    const bValue = b[sortBy as keyof ILink] ?? '';
-    
-    if (sortOrder === 'asc') {
-      return String(aValue) > String(bValue) ? 1 : -1;
-    }
-    return String(aValue) < String(bValue) ? 1 : -1;
-  });
-
+  /* ── loading ── */
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-400"></div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-primary-400">My Links</h1>
-        <Link 
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">My Links</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{links.length} link{links.length !== 1 ? 's' : ''} total</p>
+        </div>
+        <Link
           href="/generate"
-          className="bg-primary-400 text-white px-4 py-2 rounded-md hover:bg-primary-500 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          Create New Link
+          <PlusIcon className="w-4 h-4" />
+          New Link
         </Link>
       </div>
 
-      <div className="mb-6 flex gap-4">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="border-[1px] border-gray-600/20 rounded-md px-3 py-2 bg-secondary-500 focus:outline-none focus:border-primary-400"
-        >
-          <option value="all">All Types</option>
-          <option value="voting">Voting</option>
-          <option value="giveaway">Giveaway</option>
-          <option value="custom">Custom</option>
-          <option value="scratch">Build from Scratch</option>
-        </select>
+      {/* Filter tabs + sort */}
+      <div className="flex items-center gap-2">
+        {/* Scrollable pill tabs */}
+        <div className="flex gap-1.5 overflow-x-auto flex-1 pb-0.5 no-scrollbar">
+          {FILTER_TABS.map(tab => (
+            <button
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                filter === tab.value
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border-[1px] border-gray-600/20 rounded-md px-3 py-2 bg-secondary-500 focus:outline-none focus:border-primary-400"
-        >
-          <option value="createdAt">Created Date</option>
-          <option value="linkName">Link Name</option>
-          <option value="linkType">Link Type</option>
-          <option value="price">Price</option>
-        </select>
-
+        {/* Sort toggle */}
         <button
-          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className="border-[1px] border-gray-600/20 rounded-md px-3 py-2 bg-secondary-500 focus:outline-none focus:border-primary-400"
+          onClick={() => setSortDesc(s => !s)}
+          title={sortDesc ? 'Newest first' : 'Oldest first'}
+          className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
-          {sortOrder === 'asc' ? '↑' : '↓'}
+          <ArrowsUpDownIcon className="w-3.5 h-3.5" />
+          {sortDesc ? 'Newest' : 'Oldest'}
         </button>
       </div>
 
-      {sortedLinks.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No links found. Create your first link!</p>
+      {/* Empty state */}
+      {displayed.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+            <LinkIcon className="w-7 h-7 text-gray-400" />
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 font-medium mb-1">
+            {filter === 'all' ? 'No links yet' : `No ${filter} links`}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+            {filter === 'all'
+              ? 'Create your first link to get started.'
+              : 'Try a different filter or create a new link.'}
+          </p>
+          <Link
+            href="/generate"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Create a link
+          </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedLinks.map((link) => (
-            <div 
-              key={link.linkId.toString()} 
-              className="bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5 overflow-hidden"
+      )}
+
+      {/* Link cards */}
+      <div className="space-y-3">
+        {displayed.map((link) => {
+          const typeKey  = link.linkType?.toLowerCase() ?? 'custom';
+          const isCopied = copied === link.linkId?.toString();
+          const linkUrl  = `${host}/slink/${link.linkId}`;
+          const isExpired = link.expiresAt ? new Date(link.expiresAt) < new Date() : false;
+
+          return (
+            <div
+              key={link.linkId?.toString()}
+              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
             >
-              {/* Card Header with Image */}
-              <div className="relative h-48 w-full bg-gray-100">
-                {isValidImageUrl(link.image?.toString()) ? (
-                  <Image
-                    src={link.image!.toString()}
-                    alt={"Link image"}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = DEFAULT_LINK_IMAGE;
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
-                    <span className="text-4xl text-white font-bold">{link.linkName?.charAt(0)?.toUpperCase() || 'L'}</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="text-lg font-semibold text-white truncate">
-                    {link.linkName}
+              {/* Coloured top strip */}
+              <div className={`h-1 w-full ${TYPE_COLORS[typeKey] ?? 'bg-gray-400'}`} />
+
+              <div className="p-4 space-y-3">
+                {/* Row 1: name + type badge */}
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-snug line-clamp-2 flex-1">
+                    {link.linkName || 'Untitled link'}
                   </h3>
+                  <span className={`shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${TYPE_TEXT[typeKey] ?? 'text-gray-600 bg-gray-100'}`}>
+                    {link.linkType}
+                  </span>
                 </div>
-              </div>
 
-              {/* Card Content */}
-              <div className="p-4 space-y-4">
-                <div className="flex flex-col justify-between">
-                  <span className="text-sm text-gray-500 my-2">
-                    This link will expire on: {format(new Date(link.expiresAt!), 'MMM d, yyyy')}
+                {/* Row 2: link URL preview */}
+                <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2">
+                  <LinkIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate font-mono">
+                    {linkUrl}
                   </span>
-                  <div>
-                  <span className={`px-3 py-1 capitalize text-xs font-medium rounded-full
-                    ${link.linkType === 'Voting' ? 'bg-blue-100 text-blue-800' : 
-                    link.linkType === 'Giveaway' ? 'bg-green-100 text-green-800' : 
-                    'bg-purple-100 text-purple-800'}`}
-                  >
-                    {link.linkType} link
-                  </span>
-                    {
-                      link.socialMedia?.map((platform) => (
-                        <span key={platform} className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                          {platform}
-                        </span>
-                      ))
+                </div>
+
+                {/* Row 3: expiry + platforms */}
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className={`inline-flex items-center gap-1 text-xs font-medium ${isExpired ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {isExpired
+                      ? <><ExclamationCircleIcon className="w-3.5 h-3.5" /> Expired</>
+                      : <>Expires {format(new Date(link.expiresAt!), 'MMM d, yyyy')}</>
                     }
-                  </div>
+                  </span>
+                  {link.socialMedia?.map(p => (
+                    <span key={p} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 capitalize">
+                      {p}
+                    </span>
+                  ))}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
+                {/* Row 4: actions */}
+                <div className="flex gap-2 pt-1">
                   <button
-                    onClick={() => handleCopyLink(`${socialLinkHostAddress?.trim()}/slink/${link.linkId}`)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium 
-                             text-gray-700 bg-gray-50 rounded-md
-                             hover:bg-gray-100 
-                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
-                             transition-colors"
-                    aria-label="Copy link"
+                    onClick={() => handleCopy(link.linkId!.toString())}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
+                      isCopied
+                        ? 'bg-green-500 text-white'
+                        : 'bg-primary-500 hover:bg-primary-600 text-white'
+                    }`}
                   >
-                    <FaCopy className="h-4 w-4" />
-                    <span>Copy</span>
+                    {isCopied
+                      ? <><CheckCircleIcon className="w-4 h-4" /> Copied!</>
+                      : <><ClipboardDocumentIcon className="w-4 h-4" /> Copy Link</>
+                    }
                   </button>
                   <Link
-                    href={link.linkType === 'scratch' ? `/links/${link._id}/scratch` : `/links/${link._id}`}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium 
-                             text-white rounded-md
-                             focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors
-                             ${link.linkType === 'scratch' 
-                               ? 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500' 
-                               : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'}`}
-                    aria-label="View link details"
+                    href={typeKey === 'scratch' ? `/links/${link._id}/scratch` : `/links/${link._id}`}
+                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   >
-                    <FaEye className="h-4 w-4" />
-                    <span>View</span>
+                    <EyeIcon className="w-4 h-4" />
+                    View
                   </Link>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

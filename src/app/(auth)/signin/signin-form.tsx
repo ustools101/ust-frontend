@@ -21,10 +21,7 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +41,7 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
       } else {
         router.push(callbackUrl);
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -52,15 +49,15 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-3.5 py-2.5 rounded-lg">
           {error}
         </div>
       )}
-      
+
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+        <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-1.5">
           Email
         </label>
         <input
@@ -70,13 +67,13 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
           value={formData.email}
           onChange={handleChange}
           required
-          className="mt-1 block w-full rounded-md bg-secondary-700/50 border border-primary-500/20 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-          placeholder="john@example.com"
+          className="w-full bg-zinc-800 border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all duration-150"
+          placeholder="you@example.com"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+        <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-1.5">
           Password
         </label>
         <input
@@ -86,7 +83,7 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
           value={formData.password}
           onChange={handleChange}
           required
-          className="mt-1 block w-full rounded-md bg-secondary-700/50 border border-primary-500/20 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+          className="w-full bg-zinc-800 border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/60 transition-all duration-150"
           placeholder="••••••••"
         />
       </div>
@@ -94,21 +91,21 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition-all duration-150 flex items-center justify-center mt-2"
       >
         {isLoading ? (
-          <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         ) : (
           'Sign in'
         )}
       </button>
 
-      <div className="text-sm text-gray-400">
-        Don't have an account?{' '}
-        <Link href="/signup" className="text-primary-500 hover:text-primary-400">
-          Sign up
+      <p className="text-sm text-zinc-500 text-center pt-1">
+        New here?{' '}
+        <Link href="/signup" className="text-violet-400 hover:text-violet-300 transition-colors">
+          Create an account →
         </Link>
-      </div>
+      </p>
     </form>
   );
 }
@@ -116,6 +113,5 @@ function SigninFormContent({ callbackUrl }: { callbackUrl: string }) {
 export default function SigninForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  
   return <SigninFormContent callbackUrl={callbackUrl} />;
 }

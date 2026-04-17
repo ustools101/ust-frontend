@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "icons": "node scripts/generate-pwa-icons.js"
@@ -18,7 +18,7 @@
     "date-fns": "^4.1.0",
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.5",
-    "next": "^16.0.7",
+    "next": "^16.1.6",
     "next-auth": "^4.24.11",
     "next-pwa": "^5.6.0",
     "qrcode.react": "^4.2.0",

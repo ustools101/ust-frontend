@@ -22,8 +22,10 @@ import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import OnboardingModal from '@/components/OnboardingModal';
 
 const LINK_ROTATION_MODAL_KEY = 'ust_hide_link_rotation_modal';
+const ONBOARDING_KEY = 'ust_onboarding_v1';
 
 interface UserData {
   username: string;
@@ -41,9 +43,22 @@ function DashboardContent() {
   const [showBonusBanner, setShowBonusBanner] = useState(true);
   const [showLinkRotationModal, setShowLinkRotationModal] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Show onboarding for first-time visitors
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+  };
 
   // Check if user has dismissed the link rotation modal
   useEffect(() => {
@@ -207,49 +222,54 @@ function DashboardContent() {
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      {/* First-time onboarding wizard */}
+      {showOnboarding && (
+        <OnboardingModal onComplete={handleOnboardingComplete} />
+      )}
+
       {/* Link Rotation Reminder Modal */}
       {showLinkRotationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 max-w-md w-full shadow-2xl mx-4">
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl">
             <button
               onClick={handleCloseLinkRotationModal}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+              <XMarkIcon className="w-5 h-5" />
             </button>
-            
-            <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500">
-              <BellAlertIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+
+            {/* Icon */}
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-5 rounded-full bg-primary-500/10">
+              <ClockIcon className="w-6 h-6 text-primary-500" />
             </div>
-            
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-              ⚠️ Important Notice
+
+            {/* Heading */}
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-1">
+              Links refresh every 6 hours
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4 text-center text-sm sm:text-base">
-              Phishing links rotate automatically for security purposes.
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-5">
+              Your links are automatically updated at these times each day:
             </p>
-            
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-4 sm:mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <ClockIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm sm:text-base">Rotation Schedule</p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-center">
-                {['12:00 AM', '6:00 AM', '12:00 PM', '6:00 PM'].map((time) => (
-                  <div key={time} className="bg-white dark:bg-gray-800 rounded-lg py-2 px-3 border border-amber-200 dark:border-amber-700">
-                    <p className="font-bold text-amber-700 dark:text-amber-400 text-sm sm:text-base">{time}</p>
-                  </div>
-                ))}
-              </div>
+
+            {/* Schedule */}
+            <div className="flex gap-2 justify-center flex-wrap mb-5">
+              {['12:00 AM', '6:00 AM', '12:00 PM', '6:00 PM'].map((time) => (
+                <span
+                  key={time}
+                  className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium"
+                >
+                  {time}
+                </span>
+              ))}
             </div>
-            
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4 sm:mb-6">
-              <p className="text-blue-800 dark:text-blue-300 text-xs sm:text-sm">
-                <span className="font-semibold">💡 Tip:</span> Always copy the updated link from your dashboard at these times to ensure your links are working properly.
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 mb-4">
+
+            {/* Tip */}
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-5">
+              After each refresh, grab the updated link from your <span className="font-medium text-gray-700 dark:text-gray-300">Links</span> page before sharing it.
+            </p>
+
+            {/* Don't show again */}
+            <label className="flex items-center gap-2 cursor-pointer mb-5 justify-center">
               <input
                 type="checkbox"
                 id="dontShowAgain"
@@ -257,16 +277,14 @@ function DashboardContent() {
                 onChange={(e) => setDontShowAgain(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <label htmlFor="dontShowAgain" className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                Don&apos;t show this message again
-              </label>
-            </div>
-            
+              <span className="text-xs text-gray-500 dark:text-gray-400">Don&apos;t show this again</span>
+            </label>
+
             <button
               onClick={handleCloseLinkRotationModal}
-              className="w-full py-2.5 sm:py-3 px-6 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors text-sm sm:text-base"
+              className="w-full py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors text-sm"
             >
-              Got it!
+              Got it
             </button>
           </div>
         </div>
@@ -275,33 +293,40 @@ function DashboardContent() {
       {/* Welcome Bonus Celebration Modal */}
       {showBonusCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl animate-scaleIn">
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn">
             <button
               onClick={() => setShowBonusCelebration(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon className="w-5 h-5" />
             </button>
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center animate-bounce">
-              <GiftIcon className="w-10 h-10 text-white" />
+
+            {/* Icon */}
+            <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-primary-500/10 flex items-center justify-center">
+              <GiftIcon className="w-7 h-7 text-primary-500" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              🎉 Congratulations!
+
+            {/* Heading */}
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+              Bonus added to your account
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              You&apos;ve successfully connected your Telegram and claimed your welcome bonus!
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+              Telegram connected successfully. Your free credits are ready to use.
             </p>
-            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-4 mb-6">
-              <p className="text-sm text-primary-600 dark:text-primary-400 mb-1">Bonus Credited</p>
-              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
-                +{WELCOME_BONUS_AMOUNT.toLocaleString()} Credits
+
+            {/* Amount */}
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-4 mb-5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Credits added</p>
+              <p className="text-3xl font-bold text-primary-500">
+                +{WELCOME_BONUS_AMOUNT.toLocaleString()}
               </p>
             </div>
+
             <button
               onClick={() => setShowBonusCelebration(false)}
-              className="w-full py-3 px-6 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors"
+              className="w-full py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors text-sm"
             >
-              Start Exploring
+              Start exploring
             </button>
           </div>
         </div>

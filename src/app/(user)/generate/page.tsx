@@ -3,53 +3,66 @@
 import { useRouter } from 'next/navigation';
 import { ArrowRightIcon, SparklesIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 
+const OPTIONS = [
+  {
+    path: '/generate/social',
+    icon: SparklesIcon,
+    iconColor: 'text-primary-500',
+    iconBg: 'bg-primary-500/10',
+    title: 'Social Media Link',
+    description:
+      'Choose from Voting, Giveaway, or Custom. The page mimics a real social media login — Facebook, Instagram, or TikTok.',
+    tag: 'Most popular',
+    tagColor: 'bg-primary-500/10 text-primary-600 dark:text-primary-400',
+  },
+  {
+    path: '/generate/custom',
+    icon: PuzzlePieceIcon,
+    iconColor: 'text-purple-500',
+    iconBg: 'bg-purple-500/10',
+    title: 'Build from Scratch',
+    description:
+      'Design your own multi-page form with any fields, colours, and flow you want. Full control over every screen.',
+    tag: 'Advanced',
+    tagColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  },
+];
+
 export default function GeneratePage() {
   const router = useRouter();
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-semibold text-primary-400 mb-6">Generate New Link</h1>
-      
-      <div className="space-y-4">
-        <button
-          onClick={() => router.push('/generate/social')}
-          className="w-full p-6 bg-gray-900/50 border border-primary-800 rounded-lg text-left hover:border-primary-600 transition-all duration-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary-500/10 rounded-lg">
-                <SparklesIcon className="h-6 w-6 text-primary-400" />
-              </div>
-              <div>
-                <h2 className="text-xl font-medium text-primary-400">Social Media Links</h2>
-                <p className="text-sm text-gray-400 mt-2">
-                  Generate links for popular social media platforms (Facebook, Instagram, TikTok)
-                </p>
-              </div>
-            </div>
-            <ArrowRightIcon className="h-6 w-6 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          </div>
-        </button>
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+      <div>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Generate New Link</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          Pick a type below — you can always create more later.
+        </p>
+      </div>
 
-        <button
-          onClick={() => router.push('/generate/custom')}
-          className="w-full p-6 bg-gray-900/50 border border-primary-800 rounded-lg text-left hover:border-primary-600 transition-all duration-200 group"
-        >
-          <div className="flex items-center justify-between">
+      <div className="space-y-3">
+        {OPTIONS.map(({ path, icon: Icon, iconColor, iconBg, title, description, tag, tagColor }) => (
+          <button
+            key={path}
+            type="button"
+            onClick={() => router.push(path)}
+            className="w-full text-left p-5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-sm transition-all duration-150 group"
+          >
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-purple-500/10 rounded-lg">
-                <PuzzlePieceIcon className="h-6 w-6 text-purple-400" />
+              <div className={`shrink-0 p-2.5 rounded-xl ${iconBg}`}>
+                <Icon className={`w-5 h-5 ${iconColor}`} />
               </div>
-              <div>
-                <h2 className="text-xl font-medium text-purple-400">Build from Scratch</h2>
-                <p className="text-sm text-gray-400 mt-2">
-                  Create a fully customized link with your own pages, inputs, and design
-                </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{title}</span>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${tagColor}`}>{tag}</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
               </div>
+              <ArrowRightIcon className="shrink-0 w-4 h-4 text-gray-400 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <ArrowRightIcon className="h-6 w-6 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          </div>
-        </button>
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -1,118 +1,225 @@
 "use client"
 
 import Link from 'next/link';
-import { FiLock, FiBarChart, FiLayout } from 'react-icons/fi';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { FiLayout, FiZap, FiBarChart2, FiShield, FiArrowRight } from 'react-icons/fi';
 
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
-  if(session?.user){
-    router.push('/dashboard');
-  }
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) router.push('/dashboard');
+  }, [session, router]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative py-20 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+    <div className="min-h-screen bg-[#09090B] text-white">
 
-        <div className="relative z-10 text-center max-w-5xl mx-auto">
-          <div className="space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-600">
-                Best Phishing
-              </span>
-              <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-blue-600">
-                Link Generator
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Generate convincing phishing links for social media platforms with our advanced tools
+      {/* Nav */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled ? 'bg-[#09090B]/90 backdrop-blur-md border-b border-white/[0.06]' : ''}`}>
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <span className="text-lg font-bold text-violet-400 tracking-tight">UST</span>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/signin"
+              className="text-sm text-zinc-400 hover:text-white transition-colors px-4 py-2"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="text-sm bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-150 hover:-translate-y-0.5"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative pt-28 pb-16 px-6 sm:pt-40 sm:pb-28">
+        {/* Radial glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-violet-600/10 rounded-full blur-[120px]" />
+        </div>
+        {/* Subtle grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
+
+        <div className="relative max-w-4xl mx-auto text-center animate-fadeUp">
+          <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
+            <FiShield className="w-3.5 h-3.5" />
+            Security Research Platform
+          </div>
+
+          <h1 className="text-[2.25rem] leading-[1.12] sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-5">
+            The Professional{' '}
+            <span className="text-violet-400">Social Engineering</span>{' '}
+            Toolkit
+          </h1>
+
+          <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto mb-8 leading-relaxed px-2">
+            Create, deploy, and analyze social engineering simulations across major platforms.
+            Built for security researchers and red teams.
+          </p>
+
+          {/* Primary CTA first, full-width on mobile */}
+          <div className="flex flex-col gap-3 items-stretch sm:flex-row sm:items-center sm:justify-center">
+            <Link
+              href="/signup"
+              className="inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-7 py-3.5 sm:py-3 rounded-lg font-medium transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/20 text-base sm:text-sm"
+            >
+              Get Started Free <FiArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/signin"
+              className="inline-flex items-center justify-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-300 hover:text-white px-7 py-3 rounded-lg font-medium transition-all duration-150 text-sm"
+            >
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Stat bar */}
+      <div className="border-y border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 py-10 grid grid-cols-3 gap-8 text-center">
+          {[
+            { value: '10,000+', label: 'Active researchers' },
+            { value: '500K+',   label: 'Simulations run' },
+            { value: '3',       label: 'Supported platforms' },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stat.value}</div>
+              <div className="text-sm text-zinc-500">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Features */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Everything you need</h2>
+            <p className="text-zinc-500 max-w-xl mx-auto">
+              Professional-grade tools for authorized security assessments and red team operations.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center pt-4">
-              <Link 
-                href="/signin"
-                className="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 flex items-center justify-center space-x-2"
-              >
-                <span>Sign In</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-              </Link>
-              <Link 
-                href="/signup"
-                className="group px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 flex items-center justify-center space-x-2"
-              >
-                <span>Sign Up</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-              </Link>
-            </div>
           </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-          </svg>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-16">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-              Our Features
-            </span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature Card 1 */}
-            <div className="group p-8 bg-gray-800/50 backdrop-blur-lg rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 border border-gray-700/50">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-400">
-                <FiLayout className="w-8 h-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                icon: FiLayout,
+                title: 'Platform Templates',
+                desc: 'Pre-built, high-fidelity templates for Instagram, Facebook, TikTok and more. Fully customizable to your assessment needs.',
+              },
+              {
+                icon: FiZap,
+                title: 'Instant Deployment',
+                desc: 'Generate and deploy simulation links in seconds. Real-time Telegram notifications on every target interaction.',
+              },
+              {
+                icon: FiBarChart2,
+                title: 'Analytics & Reporting',
+                desc: 'Track click rates, credential submissions, and geographic data. Export detailed reports for your security assessments.',
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="group bg-zinc-900 border border-white/[0.06] hover:border-violet-500/30 hover:bg-zinc-800/80 rounded-xl p-6 transition-all duration-200"
+              >
+                <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-4">
+                  <f.icon className="w-5 h-5" />
+                </div>
+                <h3 className="text-white font-semibold mb-2">{f.title}</h3>
+                <p className="text-zinc-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-blue-400 group-hover:text-blue-300 transition-colors">
-                Customizable Templates
-              </h3>
-              <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                Ready-to-use templates for popular social platforms including Instagram, Facebook, TikTok, and more.
-              </p>
-            </div>
-
-            {/* Feature Card 2 */}
-            <div className="group p-8 bg-gray-800/50 backdrop-blur-lg rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 border border-gray-700/50">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400">
-                <FiLock className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-400 group-hover:text-purple-300 transition-colors">
-                Advanced Link Generation
-              </h3>
-              <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                Create sophisticated phishing links with our state-of-the-art generation engine and URL masking.
-              </p>
-            </div>
-
-            {/* Feature Card 3 */}
-            <div className="group p-8 bg-gray-800/50 backdrop-blur-lg rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/10 border border-gray-700/50">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-400">
-                <FiBarChart className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-indigo-400 group-hover:text-indigo-300 transition-colors">
-                Analytics Dashboard
-              </h3>
-              <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                Track your campaign performance with detailed analytics and real-time statistics.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-    </main>
+
+      {/* How it works */}
+      <section className="py-24 px-6 border-t border-white/[0.06]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">How it works</h2>
+            <p className="text-zinc-500">Up and running in minutes.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+            {[
+              {
+                step: '01',
+                title: 'Create an account',
+                desc: 'Sign up and connect your Telegram for instant real-time notifications on every interaction.',
+              },
+              {
+                step: '02',
+                title: 'Build your simulation',
+                desc: 'Choose a platform template or build a custom multi-step form from scratch using our page builder.',
+              },
+              {
+                step: '03',
+                title: 'Analyze results',
+                desc: 'Share your link and monitor interactions live from your dashboard with full geolocation data.',
+              },
+            ].map((s) => (
+              <div key={s.step}>
+                <div className="text-violet-500 font-bold text-xs tracking-widest mb-3">{s.step}</div>
+                <h3 className="text-white font-semibold mb-2">{s.title}</h3>
+                <p className="text-zinc-500 text-sm leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24 px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-zinc-900 border border-white/[0.06] rounded-2xl p-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Ready to get started?
+            </h2>
+            <p className="text-zinc-500 mb-8">
+              Join thousands of security researchers using UST for authorized assessments.
+            </p>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/20"
+            >
+              Create a free account <FiArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/[0.06] py-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-violet-400 font-bold text-sm">UST</span>
+          <p className="text-zinc-600 text-sm">
+            © {new Date().getFullYear()} Ultimate Social Tools. All rights reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            <Link href="/signin" className="text-zinc-600 hover:text-zinc-400 text-sm transition-colors">
+              Sign In
+            </Link>
+            <Link href="/signup" className="text-zinc-600 hover:text-zinc-400 text-sm transition-colors">
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </footer>
+
+    </div>
   );
 }

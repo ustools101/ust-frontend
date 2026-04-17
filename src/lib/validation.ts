@@ -182,42 +182,10 @@ export function validateEmail(email: string): ValidationError | null {
 
 // Password validation
 export function validatePassword(password: string): ValidationError | null {
-    if (password.length < 8) {
+    if (password.length < 6) {
         return {
             field: 'password',
-            message: 'Password must be at least 8 characters long'
-        };
-    }
-
-    // Check for at least one uppercase letter
-    if (!/[A-Z]/.test(password)) {
-        return {
-            field: 'password',
-            message: 'Password must contain at least one uppercase letter'
-        };
-    }
-
-    // Check for at least one lowercase letter
-    if (!/[a-z]/.test(password)) {
-        return {
-            field: 'password',
-            message: 'Password must contain at least one lowercase letter'
-        };
-    }
-
-    // Check for at least one number
-    if (!/[0-9]/.test(password)) {
-        return {
-            field: 'password',
-            message: 'Password must contain at least one number'
-        };
-    }
-
-    // Check for at least one special character
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        return {
-            field: 'password',
-            message: 'Password must contain at least one special character'
+            message: 'Password must be at least 6 characters'
         };
     }
 
