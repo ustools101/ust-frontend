@@ -11,7 +11,7 @@ export default function TelegramSupport() {
       href="https://t.me/ustools_support"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-20 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
+      className="fixed bottom-25 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform duration-200 hover:scale-110"
       aria-label="Contact Support on Telegram"
     >
       {/* telegram svg icon */}
