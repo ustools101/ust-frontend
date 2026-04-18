@@ -73,7 +73,7 @@ const PaymentModal = ({ isOpen, onClose, amount, paymentMethod, usdtRate }: Paym
 
             {/* Telegram Button */}
             <a
-              href="https://t.me/@ustools_support"
+              href="https://t.me/ustools_support"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
@@ -123,7 +123,7 @@ const PaymentModal = ({ isOpen, onClose, amount, paymentMethod, usdtRate }: Paym
 
             {/* Telegram Button */}
             <a
-              href="https://t.me/@ustools_support"
+              href="https://t.me/ustools_support"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
