@@ -15,7 +15,7 @@ export default function TelegramSupport() {
       aria-label="Contact Support on Telegram"
     >
       {/* telegram svg icon */}
-      <Image src="/telegram.png" alt="Telegram" width={24} height={24} />
+      <Image src="/telegram.png" alt="Telegram" width={64} height={64} />
     </Link>
   );
 }
