@@ -253,7 +253,7 @@ function DashboardContent() {
 
             {/* Schedule */}
             <div className="flex gap-2 justify-center flex-wrap mb-5">
-              {['12:00 AM', '6:00 AM', '12:00 PM', '6:00 PM'].map((time) => (
+              {['12:00 AM', '12:00 PM'].map((time) => (
                 <span
                   key={time}
                   className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium"
