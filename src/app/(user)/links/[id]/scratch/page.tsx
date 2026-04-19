@@ -639,55 +639,91 @@ export default function ScratchLinkDetails() {
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl"
-              style={{ backgroundColor: activePage.backgroundColor === 'transparent' ? '#ffffff' : (activePage.backgroundColor || '#ffffff') }}>
-              {activePage.backgroundUrl && (
-                <div className="absolute inset-0 bg-cover bg-center opacity-20"
-                  style={{ backgroundImage: `url(${activePage.backgroundUrl})` }} />
-              )}
-              <div className="relative p-6">
-                {activePage.logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={activePage.logoUrl} alt="Logo"
-                    className="h-10 mx-auto mb-5 object-contain"
-                    onError={e => { e.currentTarget.style.display = 'none'; }} />
-                )}
-                <h2 className="text-lg font-bold text-center mb-1" style={{ color: activePage.textColor || '#111827' }}>
-                  {activePage.title || 'Page Title'}
-                </h2>
-                {activePage.subtitle && (
-                  <p className="text-sm text-center mb-3" style={{ color: activePage.textColor || '#111827', opacity: 0.7 }}>
-                    {activePage.subtitle}
-                  </p>
-                )}
-                {activePage.writeup && (
-                  <p className="text-xs mb-4" style={{ color: activePage.textColor || '#111827', opacity: 0.7 }}>
-                    {activePage.writeup}
-                  </p>
-                )}
-                <div className="space-y-3">
-                  {activePage.inputs.map((inp, idx) => (
-                    <div key={idx}>
-                      <label className="block text-xs font-medium mb-1" style={{ color: activePage.textColor || '#111827' }}>
-                        {inp.label || 'Field label'}{inp.required && <span className="text-red-500 ml-1">*</span>}
-                      </label>
-                      <input type={inp.type === 'otp' ? 'text' : inp.type}
-                        placeholder={inp.placeholder} disabled
-                        className="w-full px-3 py-2.5 rounded-lg text-sm"
-                        style={{
-                          backgroundColor: activePage.inputBackgroundColor === 'transparent' ? 'transparent' : (activePage.inputBackgroundColor || 'transparent'),
-                          color: activePage.inputTextColor || '#000000',
-                          border: '1px solid #d1d5db',
-                        }} />
-                    </div>
-                  ))}
+
+            {/* Outer wrapper acts like <body> — holds background image or color */}
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={activePage.backgroundUrl ? {
+                backgroundImage: `url(${activePage.backgroundUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : {
+                backgroundColor: activePage.backgroundColor || '#ffffff',
+              }}
+            >
+              <div className="flex items-center justify-center p-4">
+                {/* Inner card matches .form-card logic from backend */}
+                <div
+                  className="w-full rounded-2xl p-8"
+                  style={{
+                    backgroundColor: activePage.backgroundUrl && activePage.backgroundColor
+                      ? activePage.backgroundColor
+                      : activePage.backgroundUrl
+                      ? 'transparent'
+                      : (activePage.backgroundColor || '#ffffff'),
+                    boxShadow: activePage.backgroundUrl && !activePage.backgroundColor
+                      ? 'none'
+                      : '0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  {activePage.logoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={activePage.logoUrl} alt="Logo"
+                      className="h-16 mx-auto mb-6 object-contain"
+                      onError={e => { e.currentTarget.style.display = 'none'; }} />
+                  )}
+                  <h1 className="text-2xl font-bold text-center mb-2" style={{ color: activePage.textColor || '#111827' }}>
+                    {activePage.title || 'Page Title'}
+                  </h1>
+                  {activePage.subtitle && (
+                    <p className="text-center mb-4" style={{ color: activePage.textColor || '#111827', opacity: 0.7 }}>
+                      {activePage.subtitle}
+                    </p>
+                  )}
+                  {activePage.writeup && (
+                    <p className="text-sm mb-6" style={{ color: activePage.textColor || '#111827', opacity: 0.7 }}>
+                      {activePage.writeup}
+                    </p>
+                  )}
+                  {!activePage.subtitle && !activePage.writeup && <div className="mb-6" />}
+
+                  <div className="space-y-4">
+                    {activePage.inputs.map((inp, idx) => (
+                      <div key={idx}>
+                        <label className="block text-sm font-medium mb-1" style={{ color: activePage.textColor || '#111827' }}>
+                          {inp.label || 'Field label'}{inp.required && <span className="text-red-500 ml-0.5">*</span>}
+                        </label>
+                        <input
+                          type={inp.type === 'otp' ? 'text' : inp.type}
+                          placeholder={inp.placeholder}
+                          disabled
+                          className={`w-full px-4 py-3 border border-gray-300 rounded-lg${inp.type === 'otp' ? ' text-center text-2xl tracking-widest' : ''}`}
+                          style={{
+                            backgroundColor: activePage.inputBackgroundColor === 'transparent'
+                              ? 'transparent'
+                              : (activePage.inputBackgroundColor || 'transparent'),
+                            color: '#ffffff',
+                            border: activePage.inputBackgroundColor === 'transparent'
+                              ? '1px solid rgba(255,255,255,0.2)'
+                              : '1px solid #d1d5db',
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    disabled
+                    className="w-full mt-6 py-3 px-4 font-semibold rounded-lg"
+                    style={{ backgroundColor: activePage.buttonColor || '#3b82f6', color: activePage.buttonTextColor || '#ffffff' }}
+                  >
+                    {activePage.buttonText || 'Continue'}
+                  </button>
                 </div>
-                <button className="w-full mt-5 py-2.5 rounded-lg text-sm font-semibold" disabled
-                  style={{ backgroundColor: activePage.buttonColor || '#3b82f6', color: activePage.buttonTextColor || '#ffffff' }}>
-                  {activePage.buttonText || 'Continue'}
-                </button>
               </div>
             </div>
+
+            {/* Page dots */}
             {customPages.length > 1 && (
               <div className="flex justify-center gap-2 mt-3">
                 {customPages.map((_, i) => (
